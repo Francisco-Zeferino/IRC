@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/25 15:03:35 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/25 16:11:54 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,6 @@ class Server
         int serverSocket;
         char *_port;
         sockaddr_in serverAddr;
-        
-        int _port;
-        std::string _password;
-
-        
     public:
         Server();
         ~Server();
