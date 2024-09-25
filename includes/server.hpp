@@ -6,12 +6,12 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/25 15:02:31 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/25 15:03:35 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef IRC_HPP
-# define IRC_HPP
+#ifndef SERVER_HPP
+# define SERVER_HPP
 
 #include <iostream>
 #include <cstring>
