@@ -1,25 +1,29 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   client.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/25 12:06:53 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/25 12:13:20 by ffilipe-         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
-
+#include <string>
 #include <iostream>
+#include "server.hpp"
 
-class Client{
-    private :
-        std::string username;
-        std::string nickname;
-        std::string password;      
+class Client
+{
+    public:
+        Client (int socket);
+
+        std::string getNick() const;
+        std::string getUser() const;
+        std::string getChannel() const;
+
+
+        void setNick(const std::string &nickname);
+        void setUser(const std::string &username);
+        void setNick(const std::string &channelname);
+        void sendMsg (const std::string &msg);
+
+    private:
+        int _socket;
+        std::string _nick;
+        std::string _user;
+        std::string _channel;
+
 };
 
-#endif
+//add cmdparser class com handle de:
+// nick, user, join, kick, pm;
