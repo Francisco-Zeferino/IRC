@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/25 15:02:45 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/26 16:27:01 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void Server::setupServer(char *port){
     createSocket();
     bindSocket();
     listenSocket();
-    setConnection();
+    setEpoll();
 }
 
 void Server::createSocket(){
@@ -48,15 +48,51 @@ void Server::listenSocket(){
     }
 }
 
-void Server::setConnection(){
+void Server::setEpoll(){
+    int epollfd = epoll_create1(0);
+    int nfds;
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = serverSocket;
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event);
+    struct epoll_event clientEvent[1024];
+    while(1){
+        nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
+        for(int i = 0; i < nfds; i++){
+            if(clientEvent[i].data.fd == serverSocket){
+                setConnection(epollfd);
+            }
+            else{
+                handleClients(clientEvent[i].data.fd);
+            }
+        }
+    }
+}
+
+void Server::setConnection(int epollfd){
     size_t serverAddrSize = sizeof(serverAddr);
     if((connection = accept(serverSocket, (struct sockaddr *)&serverAddr, (socklen_t *)&serverAddrSize)) < 0){
         std::cout << "Error accepting connection" << std::endl;
         exit(1);
     }
-    while(1){
-        char msg[1024] = {0};
-        read(connection, msg, 1024);
-        std::cout << msg << std::endl;
+    struct epoll_event connectionEvent;
+    connectionEvent.events = EPOLLIN;
+    connectionEvent.data.fd = connection;
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, connection, &connectionEvent);
+}
+
+void Server::handleClients(int clientConnection){;
+    char buffer[1024] = {0};
+    int readBytes = read(clientConnection, buffer, 1024);
+    if(readBytes == 0){
+        close(clientConnection);
+    }
+    else if(readBytes < 0){
+        std::cout << "Error reading from client" << std::endl;
+        exit(1);
+    }
+    else{
+        std::cout << "Client says: " << buffer << std::endl;
+        //send(clientConnection, buffer, strlen(buffer), 0);
     }
 }
