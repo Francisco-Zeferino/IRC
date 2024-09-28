@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/25 15:03:35 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/29 00:09:02 by struf            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cstdlib>
+#include "client.hpp"
+
+class Client;
 
 class Server
 {
@@ -28,8 +31,9 @@ class Server
         char *_port;
         sockaddr_in serverAddr;
         
-        int _port;
         std::string _password;
+        std::vector<pollfd> pollfds;
+        std::map<int, Client*> clients;
 
         
     public:
@@ -39,7 +43,17 @@ class Server
         void createSocket();
         void bindSocket();
         void listenSocket();
-        void setConnection();
+        // void setConnection();
+
+        // MC
+        void run();
+        void handleNewConnection();
+        void handleClientMessage(int clientSocket);
+        void closeClientConnection(int clientSocket);
+   
+
+
+        
 };
 
 #endif

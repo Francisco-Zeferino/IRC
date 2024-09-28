@@ -3,25 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/25 15:02:45 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/28 23:54:52 by struf            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/server.hpp"
+#include "server.hpp"
+#include "client.hpp"
 
 Server::Server(){}
 
-Server::~Server(){}
+Server::~Server() {
+    // close(serverSocket);
+}
+
 
 void Server::setupServer(char *port){
     _port = port;
     createSocket();
     bindSocket();
     listenSocket();
-    setConnection();
+    // setConnection();
 }
 
 void Server::createSocket(){
@@ -42,21 +46,21 @@ void Server::bindSocket(){
 }
 
 void Server::listenSocket(){
-    if(listen(serverSocket, 1024) < 0){
+    if(listen(serverSocket, MAX_CLIENTS) < 0){
         std::cout << "Error listening on socket" << std::endl;
         exit(1);
     }
 }
 
-void Server::setConnection(){
-    size_t serverAddrSize = sizeof(serverAddr);
-    if((connection = accept(serverSocket, (struct sockaddr *)&serverAddr, (socklen_t *)&serverAddrSize)) < 0){
-        std::cout << "Error accepting connection" << std::endl;
-        exit(1);
-    }
-    while(1){
-        char msg[1024] = {0};
-        read(connection, msg, 1024);
-        std::cout << msg << std::endl;
-    }
-}
+// void Server::setConnection(){
+//     size_t serverAddrSize = sizeof(serverAddr);
+//     if((connection = accept(serverSocket, (struct sockaddr *)&serverAddr, (socklen_t *)&serverAddrSize)) < 0){
+//         std::cout << "Error accepting connection" << std::endl;
+//         exit(1);
+//     }
+//     while(1){
+//         char msg[1024] = {0};
+//         read(connection, msg, 1024);
+//         std::cout << msg << std::endl;
+//     }
+// }
