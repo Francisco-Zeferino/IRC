@@ -3,25 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/26 16:27:01 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/30 10:41:48 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/server.hpp"
+#include "server.hpp"
+#include "client.hpp"
 
 Server::Server(){}
 
-Server::~Server(){}
+Server::~Server() {
+    // close(serverSocket);
+}
+
 
 void Server::setupServer(char *port){
     _port = port;
     createSocket();
     bindSocket();
     listenSocket();
-    setEpoll();
+    setConnection();
 }
 
 void Server::createSocket(){
@@ -42,7 +46,7 @@ void Server::bindSocket(){
 }
 
 void Server::listenSocket(){
-    if(listen(serverSocket, 1024) < 0){
+    if(listen(serverSocket, MAX_CLIENTS) < 0){
         std::cout << "Error listening on socket" << std::endl;
         exit(1);
     }
