@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/30 10:41:48 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/30 10:43:34 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void Server::setupServer(char *port){
     createSocket();
     bindSocket();
     listenSocket();
-    setConnection();
+    setEpoll();
 }
 
 void Server::createSocket(){
