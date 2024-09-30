@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:01:10 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/28 16:45:56 by struf            ###   ########.fr       */
+/*   Updated: 2024/09/30 10:49:18 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ int main(int argc, char **argv)
     else {
         Server server;
         server.setupServer(argv[1]); //add pass AV2
-        server.run();
         return 0;
     }
 }

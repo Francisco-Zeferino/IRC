@@ -26,19 +26,20 @@ class Client
         void setUser(const std::string &username);
         void setChannel(const std::string &channelname);
 
-        void sendMsg(const std::string &msg) const;
+        void sendMsg(const std::string &msg, int clientSocket) const;
 
 
         // Parsing
-        void parseMessage(const std::string &message);
-        void hNickCmd(std::istringstream &iss);
-        void hUserCmd(std::istringstream &iss);
-        void hJoinCmd(std::istringstream &iss);
-        void hPrivMsgCmd(std::istringstream &iss);
-        void hKickCmd(std::istringstream &iss);
-        void hInviteCmd(std::istringstream &iss);
-        void hTopicCmd(std::istringstream &iss);
-        void hModeCmd(std::istringstream &iss);
+        std::vector<std::string> splitCommands(const std::string &message);
+        void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
+        void hNickCmd(std::stringstream &iss);
+        void hUserCmd(std::stringstream &iss);
+        void hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hPrivMsgCmd(std::stringstream &iss);
+        void hKickCmd(std::stringstream &iss);
+        void hInviteCmd(std::stringstream &iss);
+        void hTopicCmd(std::stringstream &iss);
+        void hModeCmd(std::stringstream &iss);
 
     private:
         int _socket;

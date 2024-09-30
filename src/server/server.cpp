@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/30 10:43:34 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/09/30 15:19:05 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,10 @@ void Server::setEpoll(){
     while(1){
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
         for(int i = 0; i < nfds; i++){
-            if(clientEvent[i].data.fd == serverSocket){
+            if(clientEvent[i].data.fd == serverSocket)
                 setConnection(epollfd);
-            }
-            else{
-                handleClients(clientEvent[i].data.fd);
-            }
+            else
+                handleClientMessage(clientEvent[i].data.fd);
         }
     }
 }
@@ -79,24 +77,9 @@ void Server::setConnection(int epollfd){
         std::cout << "Error accepting connection" << std::endl;
         exit(1);
     }
-    struct epoll_event connectionEvent;
+    static struct epoll_event connectionEvent;
     connectionEvent.events = EPOLLIN;
     connectionEvent.data.fd = connection;
     epoll_ctl(epollfd, EPOLL_CTL_ADD, connection, &connectionEvent);
-}
-
-void Server::handleClients(int clientConnection){;
-    char buffer[1024] = {0};
-    int readBytes = read(clientConnection, buffer, 1024);
-    if(readBytes == 0){
-        close(clientConnection);
-    }
-    else if(readBytes < 0){
-        std::cout << "Error reading from client" << std::endl;
-        exit(1);
-    }
-    else{
-        std::cout << "Client says: " << buffer << std::endl;
-        //send(clientConnection, buffer, strlen(buffer), 0);
-    }
+    clients.insert(std::pair<int, Client*>(connection, new Client(connection)));
 }
