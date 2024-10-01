@@ -81,9 +81,11 @@ void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channel;
     std::string message;
     iss >> channel;
-    setChannel(channel);
     std::cout << "Client " << _socket << " joined channel " << channel << "\n";
     message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + it->second->getChannel() + " * :realname\r\n";
+    channels.push_back(new Channel);
+    channels.back()->setName(channel);
+    std::cout << channels.back()->name << std::endl;
     sendMsg(message, it->first);
 }
 

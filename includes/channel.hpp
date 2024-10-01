@@ -8,14 +8,15 @@
 
 class Channel {
     public :
-        std::vector<Client *> clients;
+        Channel();
         std::map<Client *, bool> channel;
         std::string name;
         std::string topic;
         std::string mode;
-        void addClient(Client *client);
-        void removeClient(Client *client);
+
         void setTopic(std::string topic);
+        void setMode(std::string mode);
+        void setName(std::string name);
 };
 
 #endif

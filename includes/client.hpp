@@ -8,9 +8,12 @@
 #include <algorithm>
 #include <sstream>
 #include "server.hpp"
+#include "channel.hpp"
 
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 1024
+
+class Channel;
 
 class Client
 {
@@ -21,13 +24,13 @@ class Client
         std::string getNick() const;
         std::string getUser() const;
         std::string getChannel() const;
+        std::vector<Channel *> channels;
 
         void setNick(const std::string &nickname);
         void setUser(const std::string &username);
         void setChannel(const std::string &channelname);
 
         void sendMsg(const std::string &msg, int clientSocket) const;
-
 
         // Parsing
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
@@ -39,6 +42,7 @@ class Client
         void hInviteCmd(std::stringstream &iss);
         void hTopicCmd(std::stringstream &iss);
         void hModeCmd(std::stringstream &iss);
+
 
     private:
         int _socket;
