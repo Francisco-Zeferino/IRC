@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/30 10:49:12 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/01 14:47:14 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class Server
         int serverSocket;
         char *_port;
         sockaddr_in serverAddr;
-        std::map<int, Client*> clients;
+        std::map<int, Client* > clients;
         void setEpoll();
         void createSocket();
         void bindSocket();

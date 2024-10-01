@@ -1,5 +1,6 @@
 #include "client.hpp"
 #include "server.hpp"
+#include "channel.hpp"
 
 std::vector<std::string> splitCommands(const std::string &message) {
     std::vector<std::string> commands;
@@ -77,8 +78,6 @@ void Client::hUserCmd(std::stringstream &iss) {
 }
 
 void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::vector<std::map<int, Client*>::iterator> channelVector;
-    channelVector.push_back(it);
     std::string channel;
     std::string message;
     iss >> channel;

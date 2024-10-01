@@ -30,7 +30,6 @@ class Client
 
 
         // Parsing
-        std::vector<std::string> splitCommands(const std::string &message);
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
         void hNickCmd(std::stringstream &iss);
         void hUserCmd(std::stringstream &iss);
