@@ -19,7 +19,7 @@ std::vector<std::string> splitCommands(const std::string &message) {
 }
 
 void Server::handleClientMessage(int clientSocket) {
-    char buffer[BUFFER_SIZE] = {0};
+    char buffer[BUFFER_SIZE * BUFFER_SIZE] = {0};
     memset(buffer, 0, sizeof(buffer));
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead <= 0) {

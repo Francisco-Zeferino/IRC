@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/30 15:19:05 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/01 16:37:09 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ void Server::createSocket(){
     std::cout << "Binding socket to port " << _port << std::endl;
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int));
+    fcntl(serverSocket, F_SETFL, O_NONBLOCK);
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(atoi(_port));
     serverAddr.sin_addr.s_addr = INADDR_ANY;
