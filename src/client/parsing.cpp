@@ -14,7 +14,6 @@ std::vector<std::string> splitCommands(const std::string &message) {
         }
         start = end + 2;
     }
-
     return commands;
 }
 
@@ -48,6 +47,8 @@ void Client::parseMessage(const std::string &message, std::map<int, Client*>::it
         hUserCmd(iss);
     } else if (command == "JOIN") {
         hJoinCmd(iss, it);
+    } else if (command == "PART") {
+        hPartCmd(iss, it);
     } else if (command == "PRIVMSG") {
         hPrivMsgCmd(iss);
     } else if (command == "KICK") {
@@ -59,7 +60,7 @@ void Client::parseMessage(const std::string &message, std::map<int, Client*>::it
     } else if (command == "MODE") {
         hModeCmd(iss);
     } else {
-        std::cout << "Unknown command: " << command << "\n";
+        std::cout << "Unknown cmd: " << command << "\n";
     }
 }
 
@@ -77,25 +78,94 @@ void Client::hUserCmd(std::stringstream &iss) {
     std::cout << "Client " << _socket << " set username to " << username << "\n";
 }
 
+
+// corrigi o #a do "a"
 void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string channel;
-    std::string message;
-    iss >> channel;
-    setChannel(channel);
-    std::cout << "Client " << _socket << " joined channel " << channel << "\n";
-    message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + it->second->getChannel() + " * :realname\r\n";
-    channels.push_back(new Channel);
-    channels.back()->setName(channel);
-    std::cout << channels.back()->name << std::endl;
+    std::string channelName, pass;
+    iss >> channelName >> pass;
+
+    Channel* channel = server->findOrCreateChannel(channelName);  // Get or create the channel from the server
+
+    // Check invite-only mode
+    if (channel->hasMode('i')) {
+        std::cout << "Channel " << channelName << " is invite-only.\n";
+        return;
+    }
+
+    // Check password-protected mode
+    if (channel->hasMode('k') && !pass.empty() && channel->password != pass) {
+        std::cout << "Incorrect password for channel " << channelName << "\n";
+        return;
+    }
+
+    // Check user limit
+    if (channel->hasMode('l') && channel->channelMember.size() >= channel->userslimit) {
+        std::cout << "Channel " << channelName << " is full.\n";
+        return;
+    }
+
+    // Add the client to the channel
+    channel->addClient(this);
+    std::cout << "Client " << _socket << " joined channel " << channelName << "\n";
+
+    // Notify the client that they've joined
+    std::string message = ":" + getNick() + "!" + getUser() + "@localhost JOIN " + channelName + "\r\n";
     sendMsg(message, it->first);
 }
+
+void Client::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string channelName;
+    iss >> channelName;
+
+    // Access the channel through the server
+    Channel* channel = server->findOrCreateChannel(channelName);
+
+    if (!channel) {
+        std::cout << "Channel not found: " << channelName << "\n";
+        return;
+    }
+
+    // Remove client from the channel's member list
+    channel->removeClient(this);
+    std::cout << "Client " << _socket << " left channel " << channelName << "\n";
+
+    // If the channel is now empty, remove it from the server's channels map
+    if (channel->channelMember.empty()) {
+        server->removeChannel(channelName);  // Use the new removeChannel() method
+    }
+
+    // Notify the client that they've left
+    std::string message = ":" + getNick() + "!" + getUser() + "@localhost PART " + channelName + "\r\n";
+    sendMsg(message, it->first);
+}
+
+
 
 void Client::hPrivMsgCmd(std::stringstream &iss) {
     std::string target, message;
     iss >> target;
     std::getline(iss, message);
-    std::cout << "Private message from client " << _socket << " to " << target << ": " << message << "\n";
+    bool isChannel = (target[0] == '#');  // Check if the target is a channel
+    
+    if (isChannel) {
+        Channel* channel = server->findOrCreateChannel(target);  // Get the channel from the server
+
+        if (!channel) {
+            std::cout << "Channel not found: " << target << "\n";
+            return;
+        }
+
+        for (std::map<Client*, bool>::iterator it = channel->channelMember.begin(); it != channel->channelMember.end(); ++it) {
+            if (it->first != this) {  // Don't send the message to the sender
+                it->first->sendMsg(":" + getNick() + "!" + getUser() + "@localhost PRIVMSG " + target + " :" + message + "\r\n", it->first->getSocket());
+            }
+        }
+        std::cout << "Private message from client " << _socket << " to " << target << ": " << message << "\n";
+    } else {
+        std::cout << "Target is not a channel: " << target << "\n";
+    }
 }
+
 
 void Client::hKickCmd(std::stringstream &iss) {
     std::string target, reason;
@@ -116,9 +186,20 @@ void Client::hTopicCmd(std::stringstream &iss) {
     std::cout << "Client " << _socket << " set channel topic to: " << topic << "\n";
 }
 
-void Client::hModeCmd(std::stringstream &iss) {
-    std::string mode;
-    iss >> mode;
-    std::cout << "Client " << _socket << " changed mode to: " << mode << "\n";
+// void Client::hModeCmd(std::stringstream &iss) {
+//     std::string mode;
+//     iss >> mode;
+//     std::cout << "Client " << _socket << " changed mode to: " << mode << "\n";
 
-}
+// }
+
+
+// void Server::handleClientDisconnection(int clientSocket) {
+//     std::map<int, Client*>::iterator it = clients.find(clientSocket);
+//     if (it != clients.end()) {
+//         delete it->second;  // Free the memory for the client
+//         clients.erase(it);  // Remove the client from the map
+//         std::cout << "Client disconnected: " << clientSocket << "\n";
+//     }
+//     close(clientSocket);
+// }

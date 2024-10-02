@@ -20,11 +20,12 @@ class Client
     public:
         Client(int socket);
 
+        Server *server;
+
         int getSocket() const;
         std::string getNick() const;
         std::string getUser() const;
         std::string getChannel() const;
-        std::vector<Channel *> channels;
 
         void setNick(const std::string &nickname);
         void setUser(const std::string &username);
@@ -37,6 +38,7 @@ class Client
         void hNickCmd(std::stringstream &iss);
         void hUserCmd(std::stringstream &iss);
         void hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hPrivMsgCmd(std::stringstream &iss);
         void hKickCmd(std::stringstream &iss);
         void hInviteCmd(std::stringstream &iss);
