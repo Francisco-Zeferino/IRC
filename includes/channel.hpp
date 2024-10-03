@@ -2,11 +2,8 @@
 #define CHANNEL_HPP
 
 #include "client.hpp"
-#include <vector>
-#include <map>
-#include <string>
 
-class Server;
+class Client;
 
 class Channel {
     public :
@@ -18,17 +15,19 @@ class Channel {
         std::string password;   //+k
         size_t userslimit;      //+l
 
-        std::map<Client *, bool> channelMember;
+        std::map<Client*, bool> channelMember;
 
-        void setTopic(std::string topic);
-        void setName(std::string name);
-        void setMode(std::string newMode);
+        // Chanel management
+        void setTopic(const std::string& topic);
+        void setMode(const std::string& newMode);
         bool hasMode(char mode) const;
-        void hModeCmd(Server* server, const std::string& channelName);
 
+        void applyMode(std::stringstream &iss);
+
+        //Client management
         void addClient(Client* client, bool isOperator = false);
         void removeClient(Client* client);
-        
+
 };
 
 #endif

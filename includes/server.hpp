@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/02 14:30:01 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/03 15:20:29 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ class Server
         char *_port;
         sockaddr_in serverAddr;
         
-        std::map<int, Client* > clients;
-        std::map<std::string, Channel*> channels;
+        std::map<int, Client* > clients;            //Clients connected to server
+        std::map<std::string, Channel*> channels;   //Channels on sever
 
         void setEpoll();
         void createSocket();
@@ -48,9 +48,11 @@ class Server
         ~Server();
         
         void setupServer(char *port);
+        
+        // teste
         Channel* findOrCreateChannel(const std::string& channelName);
-        void removeChannel(const std::string& channelName);
         Channel* getChannelServ(const std::string& channelName);
+        void removeChannel(const std::string& channelName);
 };
 
 #endif

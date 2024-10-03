@@ -13,6 +13,7 @@
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 1024
 
+class Server;
 class Channel;
 
 class Client
@@ -20,20 +21,21 @@ class Client
     public:
         Client(int socket);
 
+        // Pointer to the client is conected
         Server *server;
 
+        // Getters
         int getSocket() const;
         std::string getNick() const;
         std::string getUser() const;
         std::string getChannel() const;
 
+        // Setters
         void setNick(const std::string &nickname);
         void setUser(const std::string &username);
         void setChannel(const std::string &channelname);
 
-        void sendMsg(const std::string &msg, int clientSocket) const;
-
-        // Parsing
+        // Parsing & cmds
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
         void hNickCmd(std::stringstream &iss);
         void hUserCmd(std::stringstream &iss);
@@ -45,6 +47,7 @@ class Client
         void hTopicCmd(std::stringstream &iss);
         void hModeCmd(std::stringstream &iss);
 
+        void sendMsg(const std::string &msg, int clientSocket) const;
 
     private:
         int _socket;

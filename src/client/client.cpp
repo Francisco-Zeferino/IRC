@@ -1,5 +1,7 @@
 #include "client.hpp"
 #include "server.hpp"
+#include "channel.hpp"
+
 
 Client::Client(int socket) : _socket(socket) {}
 

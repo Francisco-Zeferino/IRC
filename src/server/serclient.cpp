@@ -4,11 +4,6 @@
 
 void Server::setEpoll() {
     int epollfd = epoll_create1(0);
-    if (epollfd == -1) {
-        std::cerr << "Error creating epoll instance.\n";
-        exit(1);
-    }
-
     struct epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = serverSocket;
@@ -36,6 +31,14 @@ void Server::setEpoll() {
     }
 }
 
+Channel* Server::getChannelServ(const std::string& channelName) {
+    std::map<std::string, Channel*>::iterator it = channels.find(channelName);
+    if (it != channels.end()) {
+        return it->second;
+    }
+    return NULL;
+}
+
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
     std::map<std::string, Channel*>::iterator it = channels.find(channelName);
     if (it == channels.end()) {
@@ -50,8 +53,8 @@ Channel* Server::findOrCreateChannel(const std::string& channelName) {
 void Server::removeChannel(const std::string& channelName) {
     std::map<std::string, Channel*>::iterator it = channels.find(channelName);
     if (it != channels.end()) {
-        delete it->second;  // Clean up the dynamically allocated channel
-        channels.erase(it);  // Remove the channel from the map
+        delete it->second;
+        channels.erase(it);
         std::cout << "Channel " << channelName << " removed from server.\n";
     } else {
         std::cout << "Channel " << channelName << " not found.\n";

@@ -79,36 +79,32 @@ void Client::hUserCmd(std::stringstream &iss) {
 }
 
 
-// corrigi o #a do "a"
+// Testar os modes
 void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, pass;
     iss >> channelName >> pass;
 
     Channel* channel = server->findOrCreateChannel(channelName);  // Get or create the channel from the server
+    // if (channel->hasMode('i')) {
+    //     std::cout << "Channel " << channelName << " is invite-only.\n";
+    //     return;
+    // }
 
-    // Check invite-only mode
-    if (channel->hasMode('i')) {
-        std::cout << "Channel " << channelName << " is invite-only.\n";
-        return;
-    }
+    // // +k
+    // if (channel->hasMode('k') && !pass.empty() && channel->password != pass) {
+    //     std::cout << "Incorrect password for channel " << channelName << "\n";
+    //     return;
+    // }
 
-    // Check password-protected mode
-    if (channel->hasMode('k') && !pass.empty() && channel->password != pass) {
-        std::cout << "Incorrect password for channel " << channelName << "\n";
-        return;
-    }
+    // // +l
+    // if (channel->hasMode('l') && channel->channelMember.size() >= channel->userslimit) {
+    //     std::cout << "Channel " << channelName << " is full.\n";
+    //     return;
+    // }
 
-    // Check user limit
-    if (channel->hasMode('l') && channel->channelMember.size() >= channel->userslimit) {
-        std::cout << "Channel " << channelName << " is full.\n";
-        return;
-    }
-
-    // Add the client to the channel
     channel->addClient(this);
     std::cout << "Client " << _socket << " joined channel " << channelName << "\n";
 
-    // Notify the client that they've joined
     std::string message = ":" + getNick() + "!" + getUser() + "@localhost JOIN " + channelName + "\r\n";
     sendMsg(message, it->first);
 }
@@ -117,38 +113,34 @@ void Client::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName;
     iss >> channelName;
 
-    // Access the channel through the server
-    Channel* channel = server->findOrCreateChannel(channelName);
+    // Channel* channel = server->findOrCreateChannel(channelName);
+    // if (!channel) {
+    //     std::cout << "Channel not found: " << channelName << "\n";
+    //     return;
+    // }
 
-    if (!channel) {
-        std::cout << "Channel not found: " << channelName << "\n";
-        return;
-    }
-
-    // Remove client from the channel's member list
-    channel->removeClient(this);
-    std::cout << "Client " << _socket << " left channel " << channelName << "\n";
+    // Remove client from list
+    // channel->removeClient(this);
+    // std::cout << "Client " << _socket << " left channel " << channelName << "\n";
 
     // If the channel is now empty, remove it from the server's channels map
-    if (channel->channelMember.empty()) {
-        server->removeChannel(channelName);  // Use the new removeChannel() method
-    }
+    // if (channel->channelMember.empty()) {
+    //     server->removeChannel(channelName);  // Use the new removeChannel() method
+    // }
 
-    // Notify the client that they've left
     std::string message = ":" + getNick() + "!" + getUser() + "@localhost PART " + channelName + "\r\n";
     sendMsg(message, it->first);
 }
-
 
 
 void Client::hPrivMsgCmd(std::stringstream &iss) {
     std::string target, message;
     iss >> target;
     std::getline(iss, message);
-    bool isChannel = (target[0] == '#');  // Check if the target is a channel
+    bool isChannel = (target[0] == '#'); 
     
     if (isChannel) {
-        Channel* channel = server->findOrCreateChannel(target);  // Get the channel from the server
+        Channel* channel = server->findOrCreateChannel(target);
 
         if (!channel) {
             std::cout << "Channel not found: " << target << "\n";
@@ -156,8 +148,8 @@ void Client::hPrivMsgCmd(std::stringstream &iss) {
         }
 
         for (std::map<Client*, bool>::iterator it = channel->channelMember.begin(); it != channel->channelMember.end(); ++it) {
-            if (it->first != this) {  // Don't send the message to the sender
-                it->first->sendMsg(":" + getNick() + "!" + getUser() + "@localhost PRIVMSG " + target + " :" + message + "\r\n", it->first->getSocket());
+            if (it->first != this) {
+                it->first->sendMsg(":" + getNick() + "!" + getUser() + "@localhost PRIVMSG " + target + message + "\r\n", it->first->getSocket());
             }
         }
         std::cout << "Private message from client " << _socket << " to " << target << ": " << message << "\n";
@@ -186,20 +178,16 @@ void Client::hTopicCmd(std::stringstream &iss) {
     std::cout << "Client " << _socket << " set channel topic to: " << topic << "\n";
 }
 
-// void Client::hModeCmd(std::stringstream &iss) {
-//     std::string mode;
-//     iss >> mode;
-//     std::cout << "Client " << _socket << " changed mode to: " << mode << "\n";
+void Client::hModeCmd(std::stringstream &iss) {
+    std::string channelName, mode;
+    iss >> channelName >> mode;
 
-// }
+    Channel* channel = server->getChannelServ(channelName);
+    if (!channel) {
+        std::cout << "Channel " << channelName << " not found.\n";
+        return;
+    }
+    std::cout << "Channel " << channelName << " to seeeee.\n";
 
-
-// void Server::handleClientDisconnection(int clientSocket) {
-//     std::map<int, Client*>::iterator it = clients.find(clientSocket);
-//     if (it != clients.end()) {
-//         delete it->second;  // Free the memory for the client
-//         clients.erase(it);  // Remove the client from the map
-//         std::cout << "Client disconnected: " << clientSocket << "\n";
-//     }
-//     close(clientSocket);
-// }
+    // channel->applyMode(iss);
+}
