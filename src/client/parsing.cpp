@@ -84,7 +84,7 @@ void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, pass;
     iss >> channelName >> pass;
 
-    Channel* channel = server->findOrCreateChannel(channelName);  // Get or create the channel from the server
+    server->findOrCreateChannel(channelName);  // Get or create the channel from the server
     // if (channel->hasMode('i')) {
     //     std::cout << "Channel " << channelName << " is invite-only.\n";
     //     return;
@@ -102,7 +102,7 @@ void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     //     return;
     // }
 
-    channel->addClient(this);
+    //channel->addClient(this);
     std::cout << "Client " << _socket << " joined channel " << channelName << "\n";
 
     std::string message = ":" + getNick() + "!" + getUser() + "@localhost JOIN " + channelName + "\r\n";
@@ -182,11 +182,11 @@ void Client::hModeCmd(std::stringstream &iss) {
     std::string channelName, mode;
     iss >> channelName >> mode;
 
-    Channel* channel = server->getChannelServ(channelName);
-    if (!channel) {
-        std::cout << "Channel " << channelName << " not found.\n";
-        return;
-    }
+    // Channel* channel = server->getChannelServ(channelName);
+    // if (!channel) {
+    //     std::cout << "Channel " << channelName << " not found.\n";
+    //     return;
+    // }
     std::cout << "Channel " << channelName << " to seeeee.\n";
 
     // channel->applyMode(iss);

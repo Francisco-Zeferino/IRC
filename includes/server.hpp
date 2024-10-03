@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/03 15:20:29 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/03 18:12:07 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <map>
+#include <vector>
 #include <sys/epoll.h>
 
 class Client;
@@ -34,7 +35,7 @@ class Server
         sockaddr_in serverAddr;
         
         std::map<int, Client* > clients;            //Clients connected to server
-        std::map<std::string, Channel*> channels;   //Channels on sever
+        std::vector<Channel *> channels;   //Channels on sever
 
         void setEpoll();
         void createSocket();
