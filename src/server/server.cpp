@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/03 18:16:17 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/04 13:16:48 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,18 +83,15 @@ void Server::setEpoll(){
 // }
 
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
-    std::cout << "Finding channel: " << channelName << "\n";
     std::vector<Channel*>::iterator it;
-    for(it = channels.begin(); it != channels.end(); it++){
-        if((*it)->name == channelName){
+    for(it = serverChannels.begin(); it != serverChannels.end(); it++){
+        if((*it)->name == channelName)
             break;
-        }
     }
-    std::cout << "Channel found: " << channelName << "\n";
-    if (it == channels.end()) {
+    if (it == serverChannels.end()) {
         std::cout << "Channel not found, creating new channel: " << channelName << "\n";
         Channel* newChannel = new Channel(channelName);
-        channels.push_back(newChannel);
+        serverChannels.push_back(newChannel);
         std::cout << "Channel created: " << channelName << "\n";
         return newChannel;
     }
@@ -123,4 +120,8 @@ void Server::setConnection(int epollfd){
     connectionEvent.data.fd = connection;
     epoll_ctl(epollfd, EPOLL_CTL_ADD, connection, &connectionEvent);
     clients.insert(std::pair<int, Client*>(connection, new Client(connection)));
+}
+
+void Server::sendMsg(const std::string &msg, int clientSocket) const {
+    send(clientSocket, msg.c_str(), msg.length(), 0);
 }

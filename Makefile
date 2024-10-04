@@ -1,6 +1,6 @@
 NAME = ircserv
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I./includes
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I ./includes
 
 SRCS = $(shell find src -name '*.cpp')
 

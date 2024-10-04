@@ -30,61 +30,62 @@ void Server::handleClientMessage(int clientSocket) {
         std::map<int, Client*>::iterator it = clients.find(clientSocket);
         if (it != clients.end())
             for (size_t i = 0; i < commands.size(); ++i) {
-                it->second->parseMessage(commands[i], it);
+                parseMessage(commands[i], it);
             }
         else
             std::cout << "Client not found for socket " << clientSocket << std::endl;
     }
 }
 
-void Client::parseMessage(const std::string &message, std::map<int, Client*>::iterator it) {
+void Server::parseMessage(const std::string &message, std::map<int, Client*>::iterator it) {
     std::stringstream iss(message);
     std::string command;
     iss >> command;
     if (command == "NICK") {
-        hNickCmd(iss);
+        hNickCmd(iss, it);
     } else if (command == "USER") {
-        hUserCmd(iss);
+        hUserCmd(iss, it);
     } else if (command == "JOIN") {
         hJoinCmd(iss, it);
     } else if (command == "PART") {
         hPartCmd(iss, it);
     } else if (command == "PRIVMSG") {
-        hPrivMsgCmd(iss);
+        hPrivMsgCmd(iss, it);
     } else if (command == "KICK") {
-        hKickCmd(iss);
+        hKickCmd(iss, it);
     } else if (command == "INVITE") {
-        hInviteCmd(iss);
+        hInviteCmd(iss, it);
     } else if (command == "TOPIC") {
-        hTopicCmd(iss);
+        hTopicCmd(iss, it);
     } else if (command == "MODE") {
-        hModeCmd(iss);
+        hModeCmd(iss, it);
     } else {
         std::cout << "Unknown cmd: " << command << "\n";
     }
 }
 
-void Client::hNickCmd(std::stringstream &iss) {
+void Server::hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string nickname;
     iss >> nickname;
-    setNick(nickname);
-    std::cout << "Client " << _socket << " set nickname to " << nickname << "\n";
+    it->second->setNick(nickname);
+    std::cout << "Client " << it->second->getSocket() << " set nickname to " << nickname << "\n";
 }
 
-void Client::hUserCmd(std::stringstream &iss) {
+void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string username;
     iss >> username;
-    setUser(username);
-    std::cout << "Client " << _socket << " set username to " << username << "\n";
+    it->second->setUser(username);
+    std::cout << "Client " << it->second->getSocket() << " set username to " << username << "\n";
 }
 
 
 // Testar os modes
-void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, pass;
     iss >> channelName >> pass;
 
-    server->findOrCreateChannel(channelName);  // Get or create the channel from the server
+    Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
+    channel->addClient(it->second);
     // if (channel->hasMode('i')) {
     //     std::cout << "Channel " << channelName << " is invite-only.\n";
     //     return;
@@ -102,14 +103,13 @@ void Client::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     //     return;
     // }
 
-    //channel->addClient(this);
-    std::cout << "Client " << _socket << " joined channel " << channelName << "\n";
+    std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
 
-    std::string message = ":" + getNick() + "!" + getUser() + "@localhost JOIN " + channelName + "\r\n";
+    std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
     sendMsg(message, it->first);
 }
 
-void Client::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName;
     iss >> channelName;
 
@@ -121,67 +121,67 @@ void Client::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
     // Remove client from list
     // channel->removeClient(this);
-    // std::cout << "Client " << _socket << " left channel " << channelName << "\n";
+    // std::cout << "Client " << it->second->getSocket() << " left channel " << channelName << "\n";
 
     // If the channel is now empty, remove it from the server's channels map
     // if (channel->channelMember.empty()) {
     //     server->removeChannel(channelName);  // Use the new removeChannel() method
     // }
 
-    std::string message = ":" + getNick() + "!" + getUser() + "@localhost PART " + channelName + "\r\n";
+    std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PART " + channelName + "\r\n";
     sendMsg(message, it->first);
 }
 
 
-void Client::hPrivMsgCmd(std::stringstream &iss) {
+void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, message;
     iss >> target;
     std::getline(iss, message);
     bool isChannel = (target[0] == '#'); 
     
     if (isChannel) {
-        Channel* channel = server->findOrCreateChannel(target);
+        Channel* channel = findOrCreateChannel(target);
 
         if (!channel) {
             std::cout << "Channel not found: " << target << "\n";
             return;
         }
 
-        for (std::map<Client*, bool>::iterator it = channel->channelMember.begin(); it != channel->channelMember.end(); ++it) {
-            if (it->first != this) {
-                it->first->sendMsg(":" + getNick() + "!" + getUser() + "@localhost PRIVMSG " + target + message + "\r\n", it->first->getSocket());
+        for (std::vector<Client*>::iterator vectorChannel = channel->clientsInChannel.begin(); vectorChannel != channel->clientsInChannel.end(); vectorChannel++) {
+            if (it->second != *vectorChannel) {
+                sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", (*vectorChannel)->getSocket());
             }
         }
-        std::cout << "Private message from client " << _socket << " to " << target << ": " << message << "\n";
+        std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
     } else {
         std::cout << "Target is not a channel: " << target << "\n";
     }
 }
 
 
-void Client::hKickCmd(std::stringstream &iss) {
+void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, reason;
     iss >> target >> reason;
-    std::cout << "Client " << _socket << " kicked " << target << " for reason: " << reason << "\n";
+    std::cout << "Client " << it->second->getSocket() << " kicked " << target << " for reason: " << reason << "\n";
 
 }
 
-void Client::hInviteCmd(std::stringstream &iss) {
+void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, channel;
     iss >> target >> channel;
-    std::cout << "Client " << _socket << " invited " << target << " to channel " << channel << "\n";
+    std::cout << "Client " << it->second->getSocket() << " invited " << target << " to channel " << channel << "\n";
 }
 
-void Client::hTopicCmd(std::stringstream &iss) {
+void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string topic;
     std::getline(iss, topic);
-    std::cout << "Client " << _socket << " set channel topic to: " << topic << "\n";
+    std::cout << "Client " << it->second->getSocket() << " set channel topic to: " << topic << "\n";
 }
 
-void Client::hModeCmd(std::stringstream &iss) {
+void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, mode;
     iss >> channelName >> mode;
-
+    (void)it;
     // Channel* channel = server->getChannelServ(channelName);
     // if (!channel) {
     //     std::cout << "Channel " << channelName << " not found.\n";

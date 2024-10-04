@@ -32,7 +32,3 @@ void Client::setUser(const std::string &username) {
 void Client::setChannel(const std::string &channelname) {
     _channel = channelname;
 }
-
-void Client::sendMsg(const std::string &msg, int clientSocket) const {
-    send(clientSocket, msg.c_str(), msg.length(), 0);
-}

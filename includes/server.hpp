@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/03 18:12:07 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/04 11:37:32 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Server
         sockaddr_in serverAddr;
         
         std::map<int, Client* > clients;            //Clients connected to server
-        std::vector<Channel *> channels;   //Channels on sever
+        std::vector<Channel* > serverChannels;   //Channels on sever
 
         void setEpoll();
         void createSocket();
@@ -43,7 +43,18 @@ class Server
         void listenSocket();
         void setConnection(int epollfd);
         void handleClientMessage(int clientSocket);
-        
+        void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
+        void hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+
+        void sendMsg(const std::string &msg, int clientSocket) const;
     public:
         Server();
         ~Server();

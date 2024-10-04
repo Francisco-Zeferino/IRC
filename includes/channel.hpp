@@ -15,7 +15,7 @@ class Channel {
         std::string password;   //+k
         size_t userslimit;      //+l
 
-        std::map<Client*, bool> channelMember;
+        std::vector<Client *> clientsInChannel;
 
         // Chanel management
         void setTopic(const std::string& topic);

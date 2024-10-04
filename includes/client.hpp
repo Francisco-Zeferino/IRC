@@ -21,8 +21,7 @@ class Client
     public:
         Client(int socket);
 
-        // Pointer to the client is conected
-        Server *server;
+        std::vector<Channel *> clientChannels;
 
         // Getters
         int getSocket() const;
@@ -34,20 +33,6 @@ class Client
         void setNick(const std::string &nickname);
         void setUser(const std::string &username);
         void setChannel(const std::string &channelname);
-
-        // Parsing & cmds
-        void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
-        void hNickCmd(std::stringstream &iss);
-        void hUserCmd(std::stringstream &iss);
-        void hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        void hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        void hPrivMsgCmd(std::stringstream &iss);
-        void hKickCmd(std::stringstream &iss);
-        void hInviteCmd(std::stringstream &iss);
-        void hTopicCmd(std::stringstream &iss);
-        void hModeCmd(std::stringstream &iss);
-
-        void sendMsg(const std::string &msg, int clientSocket) const;
 
     private:
         int _socket;

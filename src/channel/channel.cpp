@@ -26,11 +26,12 @@ bool Channel::hasMode(char modeChar) const {
 }
 
 void Channel::addClient(Client* client, bool isOperator) {
-    channelMember[client] = isOperator;
+    (void)isOperator;
+    clientsInChannel.push_back(client);
 }
 
 void Channel::removeClient(Client* client) {
-    channelMember.erase(client);
+    (void)client;
 }
 
 void Channel::applyMode(std::stringstream &iss) {
