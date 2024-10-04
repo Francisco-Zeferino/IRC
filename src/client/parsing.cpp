@@ -59,7 +59,9 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hTopicCmd(iss, it);
     } else if (command == "MODE") {
         hModeCmd(iss, it);
-    } else {
+    } else if (command == "WHO") {
+        hWhoCmd(iss, it);
+    }else{
         std::cout << "Unknown cmd: " << command << "\n";
     }
 }
@@ -78,14 +80,28 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::cout << "Client " << it->second->getSocket() << " set username to " << username << "\n";
 }
 
+void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it){
+   std::string channelName;
+   iss >> channelName;
+   sendMsg(":localhost 353 " + it->second->getNick() + " = " + channelName + " :@" + it->second->getNick() + "\r\n", it->first);
+   sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
+}
 
 // Testar os modes
 void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, pass;
     iss >> channelName >> pass;
+    bool isChannel = (channelName[0] == '#');
+    if(isChannel){
+        Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
+        channel->addClient(it->second);
+        std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
+        std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
+        sendMsg(message, it->first);
+    }
+    else
+        std::cout << channelName << " is not channel" << std::endl;
 
-    Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
-    channel->addClient(it->second);
     // if (channel->hasMode('i')) {
     //     std::cout << "Channel " << channelName << " is invite-only.\n";
     //     return;
@@ -102,11 +118,6 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     //     std::cout << "Channel " << channelName << " is full.\n";
     //     return;
     // }
-
-    std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
-
-    std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
-    sendMsg(message, it->first);
 }
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -154,7 +165,12 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         }
         std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
     } else {
-        std::cout << "Target is not a channel: " << target << "\n";
+        std::map<int, Client*>::iterator clientIt = clients.begin();
+        while(clientIt != clients.end()){
+            if(target == clientIt->second->getNick())
+                sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
+            clientIt++;
+        }
     }
 }
 

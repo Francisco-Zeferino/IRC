@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/04 11:37:32 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/04 15:11:42 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ class Server
         void hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-
+        void hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsg(const std::string &msg, int clientSocket) const;
     public:
         Server();
