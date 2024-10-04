@@ -83,7 +83,7 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it){
    std::string channelName;
    iss >> channelName;
-   sendMsg(":localhost 353 " + it->second->getNick() + " = " + channelName + " :@" + it->second->getNick() + "\r\n", it->first);
+   sendMsg(":localhost 353 " + it->second->getNick() + " = " + channelName + " :+" + it->second->getNick() + "\r\n", it->first);
    sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
 
