@@ -83,7 +83,14 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it){
    std::string channelName;
    iss >> channelName;
-   sendMsg(":localhost 353 " + it->second->getNick() + " = " + channelName + " :+" + it->second->getNick() + "\r\n", it->first);
+   std::vector<Client *>::iterator clientIt;
+   Channel *channel= findOrCreateChannel(channelName);
+    for(clientIt = channel->clientsInChannel.begin(); clientIt != channel->clientsInChannel.end(); clientIt++){
+        if(it->second->getNick() != (*clientIt)->getNick())
+            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + it->second->getNick() + " " + (*clientIt)->getNick() + "\r\n", it->first);
+        else
+            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + it->second->getNick() + "\r\n", it->first);
+    }
    sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
 
@@ -92,12 +99,17 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, pass;
     iss >> channelName >> pass;
     bool isChannel = (channelName[0] == '#');
+    std::vector<Client *>::iterator clientIt;
     if(isChannel){
         Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
         channel->addClient(it->second);
         std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
         std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
         sendMsg(message, it->first);
+        for(clientIt = channel->clientsInChannel.begin(); clientIt != channel->clientsInChannel.end(); clientIt++){
+            if(it->second->getNick() != (*clientIt)->getNick())
+                sendMsg(message, (*clientIt)->getSocket());
+        }
     }
     else
         std::cout << channelName << " is not channel" << std::endl;
