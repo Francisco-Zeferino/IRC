@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/04 13:16:48 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/07 15:44:25 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,15 @@ void Server::setEpoll(){
 //     }
 //     return NULL;
 // }
+
+Client* Server::getClient(const std::string user){
+    std::map<int, Client *>::iterator it;
+    for(it = clients.begin(); it != clients.end(); it++){
+        if(it->second->getNick() == user)
+            return it->second;
+    }
+    return NULL;
+}
 
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;

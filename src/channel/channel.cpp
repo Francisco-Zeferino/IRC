@@ -34,15 +34,21 @@ void Channel::removeClient(Client* client) {
     (void)client;
 }
 
-void Channel::applyMode(std::stringstream &iss) {
-    std::string modeDetails;
-    iss >> modeDetails;
+bool Channel::validateUserJoin(const std::string user){
+    std::vector<std::string>::iterator it;
+    for(it = invUsers.begin(); it != invUsers.end(); it++){
+        if(*it == user)
+            return true;
+    }
+    return false;
+}
 
-    if (modeDetails[0] == '+') {
-        setMode(modeDetails);
-        std::cout << "Mode " << modeDetails << " applied to channel " << name << "\n";
-    } else if (modeDetails[0] == '-') {
-        setMode(modeDetails);
-        std::cout << "Mode " << modeDetails << " removed from channel " << name << "\n";
+void Channel::applyMode(const std::string mode) {
+    if (mode[0] == '+') {
+        setMode(mode);
+        std::cout << "Mode " << mode << " applied to channel " << name << "\n";
+    } else if (mode[0] == '-') {
+        setMode(mode);
+        std::cout << "Mode " << mode << " removed from channel " << name << "\n";
     }
 }

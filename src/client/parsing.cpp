@@ -102,13 +102,24 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::vector<Client *>::iterator clientIt;
     if(isChannel){
         Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
-        channel->addClient(it->second);
-        std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
         std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
-        sendMsg(message, it->first);
-        for(clientIt = channel->clientsInChannel.begin(); clientIt != channel->clientsInChannel.end(); clientIt++){
-            if(it->second->getNick() != (*clientIt)->getNick())
-                sendMsg(message, (*clientIt)->getSocket());
+        if(channel->mode == "i"){
+            if(channel->validateUserJoin(it->second->getNick())){
+                std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
+                channel->addClient(it->second);
+                sendMsg(message, it->first);
+            }
+            else
+                std::cout << "Can't join Channel, not invited!" << std::endl;
+        }
+        else{
+            std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
+            channel->addClient(it->second);
+            sendMsg(message, it->first);
+            for(clientIt = channel->clientsInChannel.begin(); clientIt != channel->clientsInChannel.end(); clientIt++){
+                if(it->second->getNick() != (*clientIt)->getNick())
+                    sendMsg(message, (*clientIt)->getSocket());
+                }
         }
     }
     else
@@ -195,9 +206,14 @@ void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 }
 
 void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string target, channel;
-    iss >> target >> channel;
-    std::cout << "Client " << it->second->getSocket() << " invited " << target << " to channel " << channel << "\n";
+    std::string target, targetChannel;
+    iss >> target >> targetChannel;
+    Channel *channel = findOrCreateChannel(targetChannel);
+    Client *client = getClient(target);
+    channel->invUsers.push_back(target);
+    std::cout << "Client " << it->second->getSocket() << " invited " << target << " to channel " << targetChannel << "\n";
+    std::string msg = ":localhost " + it->second->getNick() + " " + targetChannel + ":invited to channel (+i)" + "\r\n";
+    sendMsg(msg, client->getSocket());
 }
 
 void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -210,12 +226,10 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, mode;
     iss >> channelName >> mode;
     (void)it;
-    // Channel* channel = server->getChannelServ(channelName);
-    // if (!channel) {
-    //     std::cout << "Channel " << channelName << " not found.\n";
-    //     return;
-    // }
-    std::cout << "Channel " << channelName << " to seeeee.\n";
-
-    // channel->applyMode(iss);
+    Channel* channel = findOrCreateChannel(channelName);
+    if (!channel) {
+        std::cout << "Channel " << channelName << " not found.\n";
+        return;
+    }
+    channel->applyMode(mode);
 }
