@@ -97,22 +97,14 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
 // Testar os modes
 void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, pass;
-    iss >> channelName >> pass;
+    iss >> channelName;
     bool isChannel = (channelName[0] == '#');
     std::vector<Client *>::iterator clientIt;
     if(isChannel){
         Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
-        std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
-        if(channel->mode == "i"){
-            if(channel->validateUserJoin(it->second->getNick())){
-                std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
-                channel->addClient(it->second);
-                sendMsg(message, it->first);
-            }
-            else
-                std::cout << "Can't join Channel, not invited!" << std::endl;
-        }
-        else{
+        if(validateChannelModes(iss, it, channel) == false)
+        {
+            std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
             std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
             channel->addClient(it->second);
             sendMsg(message, it->first);
@@ -124,23 +116,6 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     }
     else
         std::cout << channelName << " is not channel" << std::endl;
-
-    // if (channel->hasMode('i')) {
-    //     std::cout << "Channel " << channelName << " is invite-only.\n";
-    //     return;
-    // }
-
-    // // +k
-    // if (channel->hasMode('k') && !pass.empty() && channel->password != pass) {
-    //     std::cout << "Incorrect password for channel " << channelName << "\n";
-    //     return;
-    // }
-
-    // // +l
-    // if (channel->hasMode('l') && channel->channelMember.size() >= channel->userslimit) {
-    //     std::cout << "Channel " << channelName << " is full.\n";
-    //     return;
-    // }
 }
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -223,7 +198,7 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
 }
 
 void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string channelName, mode;
+    std::string channelName, mode, password;
     iss >> channelName >> mode;
     (void)it;
     Channel* channel = findOrCreateChannel(channelName);
@@ -231,5 +206,5 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         std::cout << "Channel " << channelName << " not found.\n";
         return;
     }
-    channel->applyMode(mode);
+    channel->applyMode(iss, mode);
 }

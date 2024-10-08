@@ -4,6 +4,10 @@
 
 Channel::Channel(std::string name) : name(name), userslimit(0) {}
 
+void Channel::setPassword(const std::string password){
+    this->password = password;
+}
+
 void Channel::setTopic(const std::string &newTopic) {
     this->topic = newTopic;
 }
@@ -43,9 +47,13 @@ bool Channel::validateUserJoin(const std::string user){
     return false;
 }
 
-void Channel::applyMode(const std::string mode) {
+void Channel::applyMode(std::stringstream &iss, const std::string mode) {
     if (mode[0] == '+') {
         setMode(mode);
+        if(this->mode == "k")
+            iss >> password;
+        else if(this->mode == "l")
+            iss >> userslimit;
         std::cout << "Mode " << mode << " applied to channel " << name << "\n";
     } else if (mode[0] == '-') {
         setMode(mode);

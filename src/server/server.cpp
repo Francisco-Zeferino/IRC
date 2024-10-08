@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/07 15:44:25 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/08 15:44:13 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,14 +74,6 @@ void Server::setEpoll(){
     }
 }
 
-// Channel* Server::getChannelServ(const std::string& channelName) {
-//     std::map<std::string, Channel*>::iterator it = channels.find(channelName);
-//     if (it != channels.end()) {
-//         return it->second;
-//     }
-//     return NULL;
-// }
-
 Client* Server::getClient(const std::string user){
     std::map<int, Client *>::iterator it;
     for(it = clients.begin(); it != clients.end(); it++){
@@ -89,6 +81,50 @@ Client* Server::getClient(const std::string user){
             return it->second;
     }
     return NULL;
+}
+
+bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel){
+    std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channel->name + "\r\n";
+    if(channel->hasMode('i')){
+        if(channel->validateUserJoin(it->second->getNick())){
+            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
+            channel->addClient(it->second);
+            sendMsg(message, it->first);
+            return true;
+        }
+        else{
+            std::cout << "Can't join Channel, not invited!" << std::endl;
+            return true;
+        }
+    }
+    else if(channel->hasMode('k')){
+        std::string password;
+        iss >> password;
+        std::cout << channel->password << std::endl;
+        if(channel->password == password){
+            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
+            channel->addClient(it->second);
+            sendMsg(message, it->first);
+            return true;
+        }
+        else{
+            std::cout << "Wrong password!" << std::endl;
+            return true;
+        }
+    }
+    else if(channel->hasMode('l')){
+        if(channel->clientsInChannel.size() >= channel->userslimit){
+            std::cout << "Maximum user limit reached" << std::endl;
+            return true;
+        }
+        else{
+            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
+            channel->addClient(it->second);
+            sendMsg(message, it->first);
+            return true;
+        }
+    }
+    return false;
 }
 
 Channel* Server::findOrCreateChannel(const std::string& channelName) {

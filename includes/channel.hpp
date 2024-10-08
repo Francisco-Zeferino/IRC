@@ -21,10 +21,11 @@ class Channel {
         // Chanel management
         void setTopic(const std::string& topic);
         void setMode(const std::string& newMode);
+        void setPassword(const std::string password);
         bool hasMode(char mode) const;
         bool validateUserJoin(const std::string user);
 
-        void applyMode(const std::string mode);
+        void applyMode(std::stringstream &iss, const std::string mode);
 
         //Client management
         void addClient(Client* client, bool isOperator = false);

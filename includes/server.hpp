@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/07 15:44:29 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/08 14:39:35 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Server
         void listenSocket();
         void setConnection(int epollfd);
         void handleClientMessage(int clientSocket);
+        bool validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel);
         Client *getClient(const std::string user);
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
         void hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
