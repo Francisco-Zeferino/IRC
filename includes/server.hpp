@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/08 14:39:35 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/09 14:49:39 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Server
         void handleClientMessage(int clientSocket);
         bool validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel);
         Client *getClient(const std::string user);
+        void notifyAllInChannel(Channel *channel, std::string message);
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
         void hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
@@ -65,7 +66,6 @@ class Server
         
         // teste
         Channel* findOrCreateChannel(const std::string& channelName);
-        Channel* getChannelServ(const std::string& channelName);
         void removeChannel(const std::string& channelName);
 };
 

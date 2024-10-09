@@ -30,8 +30,7 @@ bool Channel::hasMode(char modeChar) const {
 }
 
 void Channel::addClient(Client* client, bool isOperator) {
-    (void)isOperator;
-    clientsInChannel.push_back(client);
+    admins.insert(std::make_pair(client, isOperator));
 }
 
 void Channel::removeClient(Client* client) {

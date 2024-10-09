@@ -80,16 +80,23 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::cout << "Client " << it->second->getSocket() << " set username to " << username << "\n";
 }
 
+std::string getRole(std::map<Client *, bool>::iterator it){
+    if(it->second == true)
+        return " :@";
+    else
+        return " :";
+}
+
 void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it){
    std::string channelName;
    iss >> channelName;
-   std::vector<Client *>::iterator clientIt;
+   std::map<Client *, bool>::iterator clientIt;
    Channel *channel= findOrCreateChannel(channelName);
-    for(clientIt = channel->clientsInChannel.begin(); clientIt != channel->clientsInChannel.end(); clientIt++){
-        if(it->second->getNick() != (*clientIt)->getNick())
-            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + it->second->getNick() + " " + (*clientIt)->getNick() + "\r\n", it->first);
+    for(clientIt = channel->admins.begin(); clientIt != channel->admins.end(); clientIt++){
+        if(it->second->getNick() != clientIt->first->getNick())
+            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + clientIt->first->getNick() + "\r\n", it->first);
         else
-            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + it->second->getNick() + "\r\n", it->first);
+            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + it->second->getNick() + "\r\n", it->first);
     }
    sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
@@ -104,14 +111,13 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
         if(validateChannelModes(iss, it, channel) == false)
         {
+            if(channel->admins.size() == 0)
+                channel->addClient(it->second, true);
             std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
             std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
             channel->addClient(it->second);
             sendMsg(message, it->first);
-            for(clientIt = channel->clientsInChannel.begin(); clientIt != channel->clientsInChannel.end(); clientIt++){
-                if(it->second->getNick() != (*clientIt)->getNick())
-                    sendMsg(message, (*clientIt)->getSocket());
-                }
+            notifyAllInChannel(channel, message);
         }
     }
     else
@@ -120,25 +126,29 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName;
+    std::map<Client *, bool>::iterator mapIterator;
     iss >> channelName;
 
-    // Channel* channel = server->findOrCreateChannel(channelName);
-    // if (!channel) {
-    //     std::cout << "Channel not found: " << channelName << "\n";
-    //     return;
-    // }
+    Channel* channel = findOrCreateChannel(channelName);
+    if (!channel) {
+        std::cout << "Channel not found: " << channelName << "\n";
+        return;
+    }
 
     // Remove client from list
-    // channel->removeClient(this);
-    // std::cout << "Client " << it->second->getSocket() << " left channel " << channelName << "\n";
+    channel->removeClient(it->second);
+    std::cout << "Client " << it->second->getSocket() << " left channel " << channelName << "\n";
 
     // If the channel is now empty, remove it from the server's channels map
-    // if (channel->channelMember.empty()) {
-    //     server->removeChannel(channelName);  // Use the new removeChannel() method
-    // }
-
+    if (channel->admins.empty()) {
+          // Use the new removeChannel() method
+    }
     std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PART " + channelName + "\r\n";
-    sendMsg(message, it->first);
+    notifyAllInChannel(channel, message);
+    mapIterator = channel->admins.find(it->second);
+    (*mapIterator).second = false;
+    mapIterator++;
+    (*mapIterator).second = true;
 }
 
 
@@ -150,15 +160,13 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
     
     if (isChannel) {
         Channel* channel = findOrCreateChannel(target);
-
         if (!channel) {
             std::cout << "Channel not found: " << target << "\n";
             return;
         }
-
-        for (std::vector<Client*>::iterator vectorChannel = channel->clientsInChannel.begin(); vectorChannel != channel->clientsInChannel.end(); vectorChannel++) {
-            if (it->second != *vectorChannel) {
-                sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", (*vectorChannel)->getSocket());
+        for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
+            if (it->second != channelMap->first) {
+                sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", channelMap->first->getSocket());
             }
         }
         std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
@@ -171,7 +179,6 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         }
     }
 }
-
 
 void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, reason;

@@ -15,8 +15,10 @@ class Channel {
         std::string password;   //+k
         size_t userslimit;      //+l
 
-        std::vector<Client *> clientsInChannel;
+        // std::vector<Client *> clientsInChannel;
+        std::map<Client *, bool> admins;
         std::vector<std::string> invUsers;
+        std::vector<std::string> bannedUsers;
 
         // Chanel management
         void setTopic(const std::string& topic);

@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/08 15:44:13 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/09 15:26:30 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,15 @@ Client* Server::getClient(const std::string user){
     return NULL;
 }
 
+void Server::notifyAllInChannel(Channel *channel, std::string message){
+    std::map<Client *, bool>::iterator it;
+    it = channel->admins.begin();
+    while(it != channel->admins.end()){
+        sendMsg(message,it->first->getSocket());
+        it++;
+    }
+}
+
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel){
     std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channel->name + "\r\n";
     if(channel->hasMode('i')){
@@ -113,8 +122,9 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
         }
     }
     else if(channel->hasMode('l')){
-        if(channel->clientsInChannel.size() >= channel->userslimit){
-            std::cout << "Maximum user limit reached" << std::endl;
+        if(channel->admins.size() >= channel->userslimit){
+            std::string message = ":localhost 471 " + it->second->getNick() + " " + channel->name + " :Can't join channel, max user reached!\r\n";
+            sendMsg(message,it->first);
             return true;
         }
         else{
