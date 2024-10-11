@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/09 15:26:30 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 11:29:12 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,25 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
             channel->addClient(it->second);
             sendMsg(message, it->first);
             return true;
+        }
+    }
+    else if(channel->hasMode('o')){
+        std::string targetAdmin;
+        iss >> targetAdmin;
+        Client *client = getClient(targetAdmin);
+        if(client){
+            if(channel->admins.find(client) != channel->admins.end()){
+                std::string message = ":localhost 482 " + it->second->getNick() + " " + channel->name + " :You're already an admin!\r\n";
+                sendMsg(message,it->first);
+                return true;
+            }
+            else{
+                std::map<Client *, bool>::iterator it;
+                it = channel->admins.find(client);
+                std::string message = ":" + it->first->getNick() + "!" + it->first->getUser() + "@localhost MODE " + channel->name + " +o " + targetAdmin + "\r\n";
+                notifyAllInChannel(channel, message);
+                return true;
+            }
         }
     }
     return false;

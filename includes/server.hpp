@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/09 14:49:39 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 11:29:15 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class Server
         int serverSocket;
         char *_port;
         sockaddr_in serverAddr;
-        
         std::map<int, Client* > clients;            //Clients connected to server
         std::vector<Channel* > serverChannels;   //Channels on sever
 

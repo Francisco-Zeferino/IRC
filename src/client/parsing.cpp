@@ -205,13 +205,35 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
 }
 
 void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string channelName, mode, password;
-    iss >> channelName >> mode;
-    (void)it;
+    std::string channelName, mode, target;
+    std::string message;
+    iss >> channelName >> mode >> target;
     Channel* channel = findOrCreateChannel(channelName);
     if (!channel) {
         std::cout << "Channel " << channelName << " not found.\n";
         return;
+    }
+    if(mode == "+o"){
+        std::map<Client *, bool>::iterator channelMap = channel->admins.find(it->second);
+        if(channelMap->second == true){
+            Client *client = getClient(target);
+            channelMap = channel->admins.find(client);
+            if(channelMap->second == true){
+                message = ":localhost 491 " + it->second->getNick() + " " + channel->name + " :\00304You're already an admin!\00304\r\n";
+                sendMsg(message, it->first);
+            }
+            else{
+                message = ":localhost 381 " + channelMap->first->getNick() + " " + channel->name + " :\00303You're now an admin!\00303\r\n";
+                channelMap->second = true;
+                sendMsg(message ,client->getSocket());
+                message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost MODE " + channel->name + " +o " + target + "\r\n";
+                notifyAllInChannel(channel, message);
+            }
+        }
+        else{
+            message = ":localhost 481 " + it->second->getNick() + " :You're not an admin!\r\n";
+            sendMsg(message, it->first);
+        }
     }
     channel->applyMode(iss, mode);
 }
