@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 15:44:25 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 19:38:42 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,9 @@ Server::~Server() {
     // }
 }
 
-void Server::setupServer(char *port){
+void Server::setupServer(char *port, char *password){
     _port = port;
+    this->password = password;
     createSocket();
     bindSocket();
     listenSocket();
@@ -123,7 +124,7 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
     }
     else if(channel->hasMode('l')){
         if(channel->admins.size() >= channel->userslimit){
-            std::string message = ":localhost 471 " + it->second->getNick() + " " + channel->name + " :Can't join channel, max user reached!\r\n";
+            std::string message = ERR_CHANNELISFULL(it->second->getNick(), channel->name);
             sendMsg(message,it->first);
             return true;
         }

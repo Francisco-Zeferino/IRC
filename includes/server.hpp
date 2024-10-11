@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 15:26:42 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:40:04 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Server
         int connection;
         int serverSocket;
         char *_port;
+        char *password;
         sockaddr_in serverAddr;
         std::map<int, Client* > clients;            //Clients connected to server
         std::vector<Channel* > serverChannels;   //Channels on sever
@@ -62,7 +63,7 @@ class Server
         Server();
         ~Server();
         
-        void setupServer(char *port);
+        void setupServer(char *port, char *password);
         
         // teste
         Channel* findOrCreateChannel(const std::string& channelName);

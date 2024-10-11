@@ -61,23 +61,28 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hModeCmd(iss, it);
     } else if (command == "WHO") {
         hWhoCmd(iss, it);
-    }else{
-        std::cout << "Unknown cmd: " << command << "\n";
-    }
+    }else if(command == "PASS"){
+        std::string password;
+        iss >> password;
+        if(this->password != password){
+            sendMsg(ERR_PASSWDMISMATCH(), it->first);
+            close(it->first);
+        }
+    }else
+        return;
 }
 
 void Server::hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string nickname;
     iss >> nickname;
     it->second->setNick(nickname);
-    std::cout << "Client " << it->second->getSocket() << " set nickname to " << nickname << "\n";
 }
 
 void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string username;
     iss >> username;
     it->second->setUser(username);
-    std::cout << "Client " << it->second->getSocket() << " set username to " << username << "\n";
+    sendMsg(RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick()), it->first);
 }
 
 std::string getRole(std::map<Client *, bool>::iterator it){
@@ -220,7 +225,12 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         if(channelMap->second == true){
             Client *client = getClient(target);
             channelMap = channel->admins.find(client);
-            if(channelMap->second == true){
+            if(channelMap == channel->admins.end()){
+                std::cout << "Client not found in channel" << std::endl;
+                message = ERR_NOOPERHOST(it->second->getNick(), channel->name);
+                sendMsg(message, it->first);
+            }
+            else if(channelMap->second == true){
                 message = ":localhost 491 " + it->second->getNick() + " " + channel->name + " :\00304You're already an admin!\00304\r\n";
                 sendMsg(message, it->first);
             }

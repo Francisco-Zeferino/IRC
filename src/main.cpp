@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:01:10 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/09/30 10:49:18 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:41:00 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     }
     else {
         Server server;
-        server.setupServer(argv[1]); //add pass AV2
+        server.setupServer(argv[1], argv[2]); //add pass AV2
         return 0;
     }
 }
