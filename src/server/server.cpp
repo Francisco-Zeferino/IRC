@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 11:29:12 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 15:44:25 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
         if(channel->validateUserJoin(it->second->getNick())){
             std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
             channel->addClient(it->second);
-            sendMsg(message, it->first);
+            notifyAllInChannel(channel, message);
             return true;
         }
         else{
@@ -132,25 +132,6 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
             channel->addClient(it->second);
             sendMsg(message, it->first);
             return true;
-        }
-    }
-    else if(channel->hasMode('o')){
-        std::string targetAdmin;
-        iss >> targetAdmin;
-        Client *client = getClient(targetAdmin);
-        if(client){
-            if(channel->admins.find(client) != channel->admins.end()){
-                std::string message = ":localhost 482 " + it->second->getNick() + " " + channel->name + " :You're already an admin!\r\n";
-                sendMsg(message,it->first);
-                return true;
-            }
-            else{
-                std::map<Client *, bool>::iterator it;
-                it = channel->admins.find(client);
-                std::string message = ":" + it->first->getNick() + "!" + it->first->getUser() + "@localhost MODE " + channel->name + " +o " + targetAdmin + "\r\n";
-                notifyAllInChannel(channel, message);
-                return true;
-            }
         }
     }
     return false;

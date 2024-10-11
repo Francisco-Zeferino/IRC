@@ -194,7 +194,9 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     Client *client = getClient(target);
     channel->invUsers.push_back(target);
     std::cout << "Client " << it->second->getSocket() << " invited " << target << " to channel " << targetChannel << "\n";
-    std::string msg = ":localhost " + it->second->getNick() + " " + targetChannel + ":invited to channel (+i)" + "\r\n";
+    std::string inviting = RPL_INVITING(user_info(it->second->getNick(), it->second->getUser()), target, targetChannel);
+    std::string msg = RPL_INVITE(user_info(it->second->getNick(), it->second->getUser()), target, targetChannel);
+    notifyAllInChannel(channel, inviting);
     sendMsg(msg, client->getSocket());
 }
 
@@ -223,7 +225,7 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
                 sendMsg(message, it->first);
             }
             else{
-                message = ":localhost 381 " + channelMap->first->getNick() + " " + channel->name + " :\00303You're now an admin!\00303\r\n";
+                message = RPL_YOUREOPER(target, channel->name);
                 channelMap->second = true;
                 sendMsg(message ,client->getSocket());
                 message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost MODE " + channel->name + " +o " + target + "\r\n";

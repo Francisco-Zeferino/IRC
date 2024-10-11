@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 11:29:15 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/11 15:26:42 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <sys/epoll.h>
+#include "numeric_responses.hpp"
 
 class Client;
 class Channel;
