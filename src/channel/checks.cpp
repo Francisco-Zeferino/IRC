@@ -1,0 +1,12 @@
+#include "channel.hpp"
+#include "client.hpp"
+#include "server.hpp"
+
+void Server::hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string receivedPassword;
+    iss >> receivedPassword;
+    if (this->password != receivedPassword) {
+        sendMsg(ERR_PASSWDMISMATCH(), it->first);
+        close(it->first);
+    }
+}

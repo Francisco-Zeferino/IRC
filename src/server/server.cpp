@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 19:38:42 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:57:42 by struf            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,15 +56,20 @@ void Server::listenSocket(){
     }
 }
 
-void Server::setEpoll(){
+void Server::setEpoll() {
     int epollfd = epoll_create1(0);
     int nfds;
     struct epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = serverSocket;
-    epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event);
+    
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event) == -1) {
+        std::cerr << "Error adding connection to epoll\n";
+        return; // add defense to epool // return or exit?
+    }
+
     struct epoll_event clientEvent[1024];
-    while(1){
+    while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
         for(int i = 0; i < nfds; i++){
             if(clientEvent[i].data.fd == serverSocket)
@@ -93,8 +98,12 @@ void Server::notifyAllInChannel(Channel *channel, std::string message){
     }
 }
 
+
+// troquei os elses para ifs
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel){
     std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channel->name + "\r\n";
+    
+    // +i
     if(channel->hasMode('i')){
         if(channel->validateUserJoin(it->second->getNick())){
             std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
@@ -104,24 +113,30 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
         }
         else{
             std::cout << "Can't join Channel, not invited!" << std::endl;
+            sendMsg(ERR_INVITEONLYCHAN(it->second->getNick(), channel->name), it->first);
             return true;
         }
     }
-    else if(channel->hasMode('k')){
-        std::string password;
-        iss >> password;
-        std::cout << channel->password << std::endl;
-        if(channel->password == password){
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
+    
+    // +k
+    else if(channel->hasMode('k')) {
+        std::string providedPassword;
+        iss >> providedPassword;
+
+        // Defense: Check if the provided password matches the channel's password
+        if (channel->password == providedPassword) {
+            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << " with correct password\n";
             channel->addClient(it->second);
             sendMsg(message, it->first);
             return true;
-        }
-        else{
-            std::cout << "Wrong password!" << std::endl;
+        } else {
+            std::cout << "Wrong password for channel " << channel->name << "\n";
+            sendMsg(ERR_PASSWDMISMATCH(), it->first);
             return true;
-        }
     }
+}
+    
+    //+l
     else if(channel->hasMode('l')){
         if(channel->admins.size() >= channel->userslimit){
             std::string message = ERR_CHANNELISFULL(it->second->getNick(), channel->name);
@@ -154,16 +169,20 @@ Channel* Server::findOrCreateChannel(const std::string& channelName) {
     return *it;
 }
 
-// void Server::removeChannel(const std::string& channelName) {
-//     std::map<std::string, Channel*>::iterator it = channels.find(channelName);
-//     if (it != channels.end()) {
-//         delete it->second;
-//         channels.erase(it);
-//         std::cout << "Channel " << channelName << " removed from server.\n";
-//     } else {
-//         std::cout << "Channel " << channelName << " not found.\n";
-//     }
-// }
+// update no remove
+void Server::removeChannel(const std::string& channelName) {
+    std::vector<Channel*>::iterator it;
+    for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
+        if ((*it)->name == channelName) {
+            delete *it;
+            serverChannels.erase(it);
+            std::cout << "Channel " << channelName << " removed from server.\n";
+            return;
+        }
+    }
+    std::cout << "Channel " << channelName << " not found.\n";
+}
+
 
 void Server::setConnection(int epollfd){
     size_t serverAddrSize = sizeof(serverAddr);

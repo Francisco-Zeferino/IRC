@@ -15,19 +15,25 @@ class Channel {
         std::string password;   //+k
         size_t userslimit;      //+l
 
-        // std::vector<Client *> clientsInChannel;
         std::map<Client *, bool> admins;
         std::vector<std::string> invUsers;
         std::vector<std::string> bannedUsers;
 
         // Chanel management
-        void setTopic(const std::string& topic);
-        void setMode(const std::string& newMode);
+        void setTopic(const std::string &topic);
+        void setMode(const std::string &newMode);
         void setPassword(const std::string password);
         bool hasMode(char mode) const;
         bool validateUserJoin(const std::string user);
 
-        void applyMode(std::stringstream &iss, const std::string mode);
+        // Modes
+        // void applyMode(std::stringstream &iss, const std::string mode, Client *requester, std::map<int, Client*>::iterator it);
+        void applyMode(std::stringstream &iss, const std::string mode, Client *requester);
+        bool isAdmin(Client *client);
+        void aOperatorMode(std::stringstream &iss, bool addOperator, Client* requester);
+        void aInviteOnlyMode(bool enable);
+        void aPasswordMode(std::stringstream &iss, bool enable);
+        void aUserLimitMode(std::stringstream &iss, bool enable);
 
         //Client management
         void addClient(Client* client, bool isOperator = false);
