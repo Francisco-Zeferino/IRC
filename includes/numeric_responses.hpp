@@ -30,4 +30,9 @@
 #define ERR_NOSUCHNICK(nick, target) (":localhost 401 " + nick + " " + target + " :\00304No such nick/channel\00304\r\n")
 // Invite only channel
 #define ERR_INVITEONLYCHAN(nick, channel)(":localhost 473 " + nick + " " + channel + " :Cannot join channel (+i)\r\n")
-
+//  user provides an incorrect password to join a password-protected channel.
+#define ERR_BADCHANNELKEY(nick, channel) (":localhost 475 " + nick + " " + channel + " :\00304Incorrect channel key (password)\00304\r\n")
+// indicating that the user is already an operator for the specified channel. 
+#define ERR_USERISALREADYOP(nick, channel) (":localhost 441 " + nick + " " + channel + " :\00304User is already an operator!\00304\r\n")
+// 
+#define ERR_USERISNOTOP(nick, channel) (":localhost 442 " + nick + " " + channel + " :\00304User is not an operator!\00304\r\n")

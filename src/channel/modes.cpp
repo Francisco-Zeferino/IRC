@@ -7,10 +7,10 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> channelName >> mode;
 
     Channel* channel = findOrCreateChannel(channelName);
-    if (!channel) {
-        sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
-        return;
-    }
+    // if (!channel) {
+    //     sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
+    //     return;
+    // }
 
     if (!channel->isAdmin(it->second)) {
         sendMsg(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channelName), it->first);
@@ -20,16 +20,14 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->applyMode(iss, mode, it->second);
 }
 
-void Channel::applyMode(std::stringstream &iss, const std::string mode, Client *requester) {
-    (void)*requester;
-    
+void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* requester) {
     if (mode.empty()) return;
     char modeSign = mode[0];
     char modeType = mode[1];
 
     switch (modeType) {
         case 'o':
-            // aOperatorMode(iss, modeSign == '+', requester);
+            aOperatorMode(iss, modeSign == '+', requester);
             break;
         case 'i':
             aInviteOnlyMode(modeSign == '+');
@@ -40,70 +38,51 @@ void Channel::applyMode(std::stringstream &iss, const std::string mode, Client *
         case 'l':
             aUserLimitMode(iss, modeSign == '+');
             break;
+        case 't':
+            // +t
+            break;
         default:
             // sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
             break; 
     }
 }
 
-// void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *requester) {
-//     void
-//     std::string targetNick;
-//     iss >> targetNick;
+void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *requester) {
+    (void)*requester;
+    (void)addOperator;
+    (void)&iss;
+    // std::string targetNick;
+    // iss >> targetNick;
 
-//     Client* targetClient = getClient(targetNick);  // Find the client in the server or channel
+    // Client* targetClient = requester->server->getClient(targetNick);
+    // if (!targetClient) {
+    //     sendMsg(ERR_NOOPERHOST(requester->getNick(), name), requester->getSocket());
+    //     return;
+    // }
 
-//     if (!targetClient) {
-//         // If target user is not found
-//         requester->sendMsg(ERR_NOSUCHNICK(requester->getNick(), targetNick), requester->getSocket());
-//         return;
-//     }
+    // if (admins[targetClient] == addOperator) {
+    //     std::string message = addOperator ? ERR_USERISALREADYOP(requester->getNick(), name) : ERR_USERISNOTOP(requester->getNick(), name);
+    //     sendMsg(message, requester->getSocket());
+    //     return;
+    // }
 
-//     // Check if target client is in the channel
-//     if (admins.find(targetClient) == admins.end()) {
-//         std::string message = ERR_USERNOTINCHANNEL(requester->getNick(), targetNick, name);
-//         requester->sendMsg(message, requester->getSocket());
-//         return;
-//     }
-
-//     // Check if the target is already an operator
-//     if (admins[targetClient] == addOperator) {
-//         std::string message;
-//         if (addOperator) {
-//             message = ":localhost 491 " + requester->getNick() + " " + name + " :\00304User is already an operator!\00304\r\n";
-//         } else {
-//             message = ":localhost 491 " + requester->getNick() + " " + name + " :\00304User is not an operator!\00304\r\n";
-//         }
-//         // requester->sendMsg(message, requester->getSocket());
-//         return;
-//     }
-
-//     // Grant or revoke operator status
-//     admins[targetClient] = addOperator;
-//     std::string message = RPL_YOUREOPER(targetNick, name);
-//     // targetClient->sendMsg(message, targetClient->getSocket());
-
-//     // Notify all users in the channel about the mode change
-//     message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + (addOperator ? " +o " : " -o ") + targetNick + "\r\n";
-//     // notifyAllInChannel(this, message);
-//     return;
-// }
+    // admins[targetClient] = addOperator;
+    // std::string modeChangeMsg = ":localhost MODE " + name + (addOperator ? " +o " : " -o ") + targetNick + "\r\n";
+    // notifyAllInChannel(this, modeChangeMsg);
+}
 
 
 
 void Channel::aInviteOnlyMode(bool enable) {
-    if (enable) {
-        if (!hasMode('i')) {
-            mode += 'i';
-            std::cout << "Invite-only mode enabled for channel " << name << "\n";
-        }
-    } else {
-        if (hasMode('i')) {
-            mode.erase(mode.find('i'), 1);
-            std::cout << "Invite-only mode disabled for channel " << name << "\n";
-        }
+    if (enable && !hasMode('i')) {
+        mode += 'i';
+        std::cout << "Invite-only mode enabled for channel " << name << "\n";
+    } else if (!enable && hasMode('i')) {
+        mode.erase(mode.find('i'), 1);
+        std::cout << "Invite-only mode disabled for channel " << name << "\n";
     }
-    // notifyAll(modeChangeMsg);
+    std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +i" : " -i") + "\r\n";
+    // notifyAllInChannel(this, modeChangeMsg);
 }
 
 void Channel::aPasswordMode(std::stringstream &iss, bool enable) {
@@ -141,12 +120,20 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
             std::cout << "User limit set to " << userslimit << " for channel: " << name << std::endl;
         } else {
             std::cout << "Invalid user limit provided.\n";
+            return; //add
         }
     } else {
-        mode.erase(mode.find('l'), 1);
-        userslimit = 0; // funciona a 0?
-        std::cout << "User limit mode disabled for channel " << name << "\n";
+        if (hasMode('l')) {
+            mode.erase(mode.find('l'), 1);
+            userslimit = 0;
+            std::cout << "User limit mode disabled for channel " << name << "\n";
+        } else {
+            std::cout << "User limit mode not set, cannot disable.\n";
+            return;
+        }
     }
-    std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +l " + userslimit : " -l") + "\r\n";
-    // notifyAll(modeChangeMsg);
+
+    std::cout << "Limits atm: " << userslimit << ".\n";
+    // std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +l " + std::to_string(userslimit) : " -l") + "\r\n";
+    // notifyAllInChannel(this, modeChangeMsg.str());
 }

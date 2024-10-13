@@ -27,10 +27,10 @@ class Channel {
         bool validateUserJoin(const std::string user);
 
         // Modes
-        // void applyMode(std::stringstream &iss, const std::string mode, Client *requester, std::map<int, Client*>::iterator it);
         void applyMode(std::stringstream &iss, const std::string mode, Client *requester);
         bool isAdmin(Client *client);
         void aOperatorMode(std::stringstream &iss, bool addOperator, Client* requester);
+        // void aOperatorMode(const std::string& targetNick, bool addOperator, Client *requester);
         void aInviteOnlyMode(bool enable);
         void aPasswordMode(std::stringstream &iss, bool enable);
         void aUserLimitMode(std::stringstream &iss, bool enable);

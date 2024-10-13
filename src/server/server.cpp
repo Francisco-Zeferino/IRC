@@ -6,7 +6,7 @@
 /*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/12 23:57:42 by struf            ###   ########.fr       */
+/*   Updated: 2024/10/13 16:14:28 by struf            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,75 +98,23 @@ void Server::notifyAllInChannel(Channel *channel, std::string message){
     }
 }
 
-
-// troquei os elses para ifs
-bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel){
-    std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channel->name + "\r\n";
-    
-    // +i
-    if(channel->hasMode('i')){
-        if(channel->validateUserJoin(it->second->getNick())){
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
-            channel->addClient(it->second);
-            notifyAllInChannel(channel, message);
-            return true;
-        }
-        else{
-            std::cout << "Can't join Channel, not invited!" << std::endl;
-            sendMsg(ERR_INVITEONLYCHAN(it->second->getNick(), channel->name), it->first);
-            return true;
-        }
-    }
-    
-    // +k
-    else if(channel->hasMode('k')) {
-        std::string providedPassword;
-        iss >> providedPassword;
-
-        // Defense: Check if the provided password matches the channel's password
-        if (channel->password == providedPassword) {
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << " with correct password\n";
-            channel->addClient(it->second);
-            sendMsg(message, it->first);
-            return true;
-        } else {
-            std::cout << "Wrong password for channel " << channel->name << "\n";
-            sendMsg(ERR_PASSWDMISMATCH(), it->first);
-            return true;
-    }
-}
-    
-    //+l
-    else if(channel->hasMode('l')){
-        if(channel->admins.size() >= channel->userslimit){
-            std::string message = ERR_CHANNELISFULL(it->second->getNick(), channel->name);
-            sendMsg(message,it->first);
-            return true;
-        }
-        else{
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
-            channel->addClient(it->second);
-            sendMsg(message, it->first);
-            return true;
-        }
-    }
-    return false;
-}
-
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
-    for(it = serverChannels.begin(); it != serverChannels.end(); it++){
-        if((*it)->name == channelName)
-            break;
+    for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
+        if ((*it)->name == channelName) {
+            return *it;
+        }
     }
-    if (it == serverChannels.end()) {
-        std::cout << "Channel not found, creating new channel: " << channelName << "\n";
-        Channel* newChannel = new Channel(channelName);
-        serverChannels.push_back(newChannel);
-        std::cout << "Channel created: " << channelName << "\n";
-        return newChannel;
-    }
-    return *it;
+
+    std::cout << "Channel not found, creating new channel: " << channelName << "\n";
+    Channel* newChannel = new Channel(channelName);
+
+    newChannel->setMode("+t");
+    newChannel->setMode("+o");
+
+    serverChannels.push_back(newChannel);
+    std::cout << "Channel created: " << channelName << " with default modes: +t +o\n";
+    return newChannel;
 }
 
 // update no remove
@@ -182,7 +130,6 @@ void Server::removeChannel(const std::string& channelName) {
     }
     std::cout << "Channel " << channelName << " not found.\n";
 }
-
 
 void Server::setConnection(int epollfd){
     size_t serverAddrSize = sizeof(serverAddr);

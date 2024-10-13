@@ -18,12 +18,13 @@ std::vector<std::string> splitCommands(const std::string &message) {
 }
 
 void Server::handleClientMessage(int clientSocket) {
-    char buffer[BUFFER_SIZE * BUFFER_SIZE] = {0};
+    char buffer[BUFFER_SIZE] = {0}; // why bf * bf?
     memset(buffer, 0, sizeof(buffer));
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead <= 0) {
         close(clientSocket);
     } else {
+        // verificar a pass do server?
         std::vector<std::string> commands;
         std::string message(buffer);
         commands = splitCommands(message);
@@ -101,32 +102,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
 
-// Testar os modes
-void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string channelName, pass;
-    iss >> channelName;
 
-    bool isChannel = (channelName[0] == '#');
-    // std::vector<Client *>::iterator clientIt;
-    if(isChannel){
-        Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
-
-        if(validateChannelModes(iss, it, channel) == false)
-        {
-            if(channel->admins.size() == 0)
-                channel->addClient(it->second, true);
-
-            std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
-            
-            channel->addClient(it->second);
-            sendMsg(message, it->first);
-            notifyAllInChannel(channel, message);
-        }
-    }
-    else
-        std::cout << channelName << " is not channel" << std::endl;
-}
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName;
