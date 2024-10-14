@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 19:38:42 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/14 15:30:14 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,14 +44,14 @@ void Server::createSocket(){
 
 void Server::bindSocket(){
     if(bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0){
-        std::cout << "Error binding socket" << std::endl;
+        std::cerr << "Error binding socket" << std::endl;
         exit(1);
     }
 }
 
 void Server::listenSocket(){
     if(listen(serverSocket, MAX_CLIENTS) < 0){
-        std::cout << "Error listening on socket" << std::endl;
+        std::cerr << "Error listening on socket" << std::endl;
         exit(1);
     }
 }
@@ -62,15 +62,30 @@ void Server::setEpoll(){
     struct epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = serverSocket;
-    epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event);
+    if(epollfd == -1){
+        std::cerr << "Error creating epoll" << std::endl;
+        return ;
+    }
+
+    if(epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event)){
+        std::cout << "Failed to add file descriptor to epoll" << std::endl;
+        return ;
+    }
     struct epoll_event clientEvent[1024];
     while(1){
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
+        if(nfds == -1){
+            std::cerr << "Error during epoll wait" << std::endl;
+            return;
+        }
         for(int i = 0; i < nfds; i++){
-            if(clientEvent[i].data.fd == serverSocket)
-                setConnection(epollfd);
-            else
-                handleClientMessage(clientEvent[i].data.fd);
+            if(clientEvent[i].events & EPOLLIN){
+                if(clientEvent[i].data.fd == serverSocket)
+                    setConnection(epollfd);
+                else
+                    handleClientMessage(clientEvent[i].data.fd);
+
+            }
         }
     }
 }
