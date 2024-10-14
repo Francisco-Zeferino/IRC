@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/12 22:14:27 by struf            ###   ########.fr       */
+/*   Updated: 2024/10/14 11:00:28 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@
 
 class Client;
 class Channel;
+
+
 
 class Server
 {
@@ -62,8 +64,6 @@ class Server
         void hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         
-        void notifyAllInChannel(Channel *channel, std::string message);
-        void sendMsg(const std::string &msg, int clientSocket) const;
         
     public:
         Server();

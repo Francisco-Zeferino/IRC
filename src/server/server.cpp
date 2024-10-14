@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/13 16:14:28 by struf            ###   ########.fr       */
+/*   Updated: 2024/10/14 11:01:29 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,14 +89,6 @@ Client* Server::getClient(const std::string user){
     return NULL;
 }
 
-void Server::notifyAllInChannel(Channel *channel, std::string message){
-    std::map<Client *, bool>::iterator it;
-    it = channel->admins.begin();
-    while(it != channel->admins.end()){
-        sendMsg(message,it->first->getSocket());
-        it++;
-    }
-}
 
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
@@ -144,6 +136,3 @@ void Server::setConnection(int epollfd){
     clients.insert(std::pair<int, Client*>(connection, new Client(connection)));
 }
 
-void Server::sendMsg(const std::string &msg, int clientSocket) const {
-    send(clientSocket, msg.c_str(), msg.length(), 0);
-}

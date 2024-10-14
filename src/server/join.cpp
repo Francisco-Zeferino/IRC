@@ -24,8 +24,8 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
             channel->addClient(it->second);
         }
 
-        sendMsg(message, it->first);
-        notifyAllInChannel(channel, message);
+        channel->sendMsg(message, it->first);
+        channel->notifyAllInChannel(channel, message);
     } else {
         std::cout << channelName << " is not a valid channel name\n";
     }
@@ -34,22 +34,23 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel* channel) {
     if (channel->hasMode('l') && channel->admins.size() >= channel->userslimit) {
-        sendMsg(ERR_CHANNELISFULL(it->second->getNick(), channel->name), it->first);
+        channel->sendMsg(ERR_CHANNELISFULL(it->second->getNick(), channel->name), it->first);
         return true;
     }
 
     if (channel->hasMode('i')) {
         if (!channel->validateUserJoin(it->second->getNick())) {
-            sendMsg(ERR_INVITEONLYCHAN(it->second->getNick(), channel->name), it->first);
+            channel->sendMsg(ERR_INVITEONLYCHAN(it->second->getNick(), channel->name), it->first);
             return true;
         }
     }
 
     if (channel->hasMode('k')) {
+        std::cout << "Here" << std::endl;
         std::string providedPassword;
         iss >> providedPassword;
         if (channel->password != providedPassword) {
-            sendMsg(ERR_BADCHANNELKEY(it->second->getNick(), channel->name), it->first);
+            channel->sendMsg(ERR_BADCHANNELKEY(it->second->getNick(), channel->name), it->first);
             return true;
         }
     }

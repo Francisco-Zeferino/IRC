@@ -7,7 +7,7 @@ void Server::hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> receivedPassword;
 
     if (this->password != receivedPassword) {
-        sendMsg(ERR_PASSWDMISMATCH(), it->first);
+        // channel->sendMsg(ERR_PASSWDMISMATCH(), it->first);
         close(it->first);
         std::cout << "Client disconnected due to incorrect password/n";
     } else {

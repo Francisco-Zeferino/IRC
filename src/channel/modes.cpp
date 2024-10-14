@@ -7,13 +7,9 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> channelName >> mode;
 
     Channel* channel = findOrCreateChannel(channelName);
-    // if (!channel) {
-    //     sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
-    //     return;
-    // }
 
     if (!channel->isAdmin(it->second)) {
-        sendMsg(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channelName), it->first);
+        channel->sendMsg(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channelName), it->first);
         return;
     }
 
@@ -42,7 +38,7 @@ void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* 
             // +t
             break;
         default:
-            // sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
+            sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
             break; 
     }
 }
@@ -82,12 +78,12 @@ void Channel::aInviteOnlyMode(bool enable) {
         std::cout << "Invite-only mode disabled for channel " << name << "\n";
     }
     std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +i" : " -i") + "\r\n";
-    // notifyAllInChannel(this, modeChangeMsg);
+    notifyAllInChannel(this, modeChangeMsg);
 }
 
 void Channel::aPasswordMode(std::stringstream &iss, bool enable) {
     if (enable) {
-    std::string newPassword;
+        std::string newPassword;
         iss >> newPassword;
 
         if (newPassword.empty()) {
@@ -96,17 +92,20 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable) {
         }
 
         this->password = newPassword;
+        mode = "k";
         std::cout << "Password set for channel " << name << "\n";
         
+        // std::cout << "TERSTEpass = " << password << "\n";
+
         std::string message = ":localhost MODE " + name + " +k \r\n";
-        // notifyAllInChannel(this, message);
+        notifyAllInChannel(this, message);
     } 
     else {
         this->password.clear();
         std::cout << "Password removed for channel " << name << "\n";
         
         std::string message = ":localhost MODE " + name + " -k \r\n";
-        // notifyAllInChannel(this, message);
+        notifyAllInChannel(this, message);
     }
 }
 
@@ -117,6 +116,7 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
 
         if (newLimit > 0) {
             userslimit = newLimit;
+            mode = "l";
             std::cout << "User limit set to " << userslimit << " for channel: " << name << std::endl;
         } else {
             std::cout << "Invalid user limit provided.\n";
@@ -134,6 +134,6 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
     }
 
     std::cout << "Limits atm: " << userslimit << ".\n";
-    // std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +l " + std::to_string(userslimit) : " -l") + "\r\n";
-    // notifyAllInChannel(this, modeChangeMsg.str());
+    // std::string modeChangeMsg = ":localhost MODE " + name + << " (userslimit) : " -l") + "\r\n";
+    // notifyAllInChannel(this, modeChangeMsg);
 }

@@ -39,6 +39,9 @@ class Channel {
         void addClient(Client* client, bool isOperator = false);
         void removeClient(Client* client);
 
+        void sendMsg(const std::string &msg, int clientSocket);
+        void notifyAllInChannel(Channel *channel, std::string message);
+
 };
 
 #endif

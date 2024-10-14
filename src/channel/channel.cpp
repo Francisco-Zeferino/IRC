@@ -38,7 +38,14 @@ void Channel::removeClient(Client *client) {
 }
 
 bool Channel::isAdmin(Client* client) {
-    return admins.find(client) != admins.end();
+    std::map<Client *, bool>::iterator it;
+
+    it = admins.find(client);
+    if(it->second == true) {
+        return true;
+    }
+    else
+        return false;
 }
 
 bool Channel::validateUserJoin(const std::string user) {
@@ -50,3 +57,15 @@ bool Channel::validateUserJoin(const std::string user) {
     return false;
 }
 
+void Channel::sendMsg(const std::string &msg, int clientSocket) {
+    send(clientSocket, msg.c_str(), msg.length(), 0);
+}
+
+void Channel::notifyAllInChannel(Channel *channel, std::string message){
+    std::map<Client *, bool>::iterator it;
+    it = channel->admins.begin();
+    while(it != channel->admins.end()) {
+        sendMsg(message,it->first->getSocket());
+        it++;
+    }
+}
