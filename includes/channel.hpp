@@ -10,17 +10,18 @@ class Channel {
         Channel(std::string name);
 
         std::string name;
-        std::string topic;
+        std::string topic;      //+t
         std::string mode;       //+i
         std::string password;   //+k
-        size_t userslimit;      //+l
+        size_t      userslimit; //+l
+        
 
         std::map<Client *, bool> admins;
         std::vector<std::string> invUsers;
         std::vector<std::string> bannedUsers;
 
         // Chanel management
-        void setTopic(const std::string &topic);
+        void setTopic(const std::string &newTopic, Client* requester);
         void setMode(const std::string &newMode);
         void setPassword(const std::string password);
         bool hasMode(char mode) const;
@@ -30,7 +31,6 @@ class Channel {
         void applyMode(std::stringstream &iss, const std::string mode, Client *requester);
         bool isAdmin(Client *client);
         void aOperatorMode(std::stringstream &iss, bool addOperator, Client* requester);
-        // void aOperatorMode(const std::string& targetNick, bool addOperator, Client *requester);
         void aInviteOnlyMode(bool enable);
         void aPasswordMode(std::stringstream &iss, bool enable);
         void aUserLimitMode(std::stringstream &iss, bool enable);

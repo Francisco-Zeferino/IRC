@@ -8,8 +8,15 @@ void Channel::setPassword(const std::string password){
     this->password = password;
 }
 
-void Channel::setTopic(const std::string &newTopic) {
-    this->topic = newTopic;
+void Channel::setTopic(const std::string &newTopic, Client* requester) {
+    if (hasMode('t') && !isAdmin(requester)) {
+        sendMsg(ERR_CHANOPRIVSNEEDED(requester->getNick(), name), requester->getSocket());
+        return;
+    }
+
+    topic = newTopic;
+    std::string message = ":localhost TOPIC " + name + " :" + newTopic + "\r\n";
+    notifyAllInChannel(this, message);
 }
 
 void Channel::setMode(const std::string &newMode) {
@@ -34,7 +41,7 @@ void Channel::addClient(Client *client, bool isOperator) {
 }
 
 void Channel::removeClient(Client *client) {
-    admins.erase(client); // erase
+    admins.erase(client); // erase a redefenir
 }
 
 bool Channel::isAdmin(Client* client) {

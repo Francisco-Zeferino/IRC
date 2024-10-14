@@ -6,13 +6,17 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/14 11:00:28 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/14 15:31:48 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+#include <poll.h>
+#include <fcntl.h> 
+#include <algorithm>
+#include <sstream>
 #include <iostream>
 #include <cstring>
 #include <netinet/in.h>
@@ -26,8 +30,6 @@
 
 class Client;
 class Channel;
-
-
 
 class Server
 {
@@ -59,11 +61,10 @@ class Server
         void hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        
+        void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         
     public:
         Server();

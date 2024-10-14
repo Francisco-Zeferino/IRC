@@ -62,8 +62,10 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hModeCmd(iss, it);
     } else if (command == "WHO") {
         hWhoCmd(iss, it);
-    }else if (command == "PASS") { //changed
+    } else if (command == "PASS") {
         hPassCmd(iss, it);
+    } else if (command == "QUIT") {
+        // hQuitCmd(iss, it);
     }else
         return;
 }
@@ -117,10 +119,10 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     }
     std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PART " + channelName + "\r\n";
     channel->notifyAllInChannel(channel, message);
-    mapIterator = channel->admins.find(it->second);
-    (*mapIterator).second = false;
-    mapIterator++;
-    (*mapIterator).second = true;
+    // mapIterator = channel->admins.find(it->second);
+    // (*mapIterator).second = false;
+    // mapIterator++;
+    // (*mapIterator).second = true;
 }
 
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -171,9 +173,30 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     channel->sendMsg(msg, client->getSocket());
 }
 
-void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string topic;
-    std::getline(iss, topic);
-    std::cout << "Client " << it->second->getSocket() << " set channel topic to: " << topic << "\n";
-}
 
+void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string channelName, newTopic;
+    iss >> channelName;
+
+    Channel* channel = findOrCreateChannel(channelName);
+    if (!channel) {
+        channel->sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
+        return;
+    }
+
+    // If no new topic is provided, return the current topic
+    // if (iss.rdbuf()->in_avail() == 0) {
+    //     std::string currentTopic = channel->getTopic();
+    //     if (currentTopic == "No topic is set") {
+    //         channel->sendMsg(RPL_NOTOPIC(it->second->getNick(), channelName), it->first);
+    //     } else {
+    //         channel->sendMsg(RPL_TOPIC(it->second->getNick(), channelName, currentTopic), it->first);
+    //     }
+    //     return;
+    // }
+
+    // // If new topic is provided, attempt to set it
+    // std::getline(iss, newTopic);
+    // newTopic = newTopic.substr(1);  // Remove leading space
+    // channel->setTopic(newTopic, it->second);
+}

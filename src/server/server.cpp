@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/14 11:01:29 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:06:06 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,9 @@ void Server::setEpoll() {
     
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event) == -1) {
         std::cerr << "Error adding connection to epoll\n";
-        return; // add defense to epool // return or exit?
+        return;
     }
-
+    
     struct epoll_event clientEvent[1024];
     while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
