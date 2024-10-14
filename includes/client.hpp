@@ -11,7 +11,7 @@
 #include "channel.hpp"
 
 #define MAX_CLIENTS 100
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 100
 
 class Server;
 class Channel;
