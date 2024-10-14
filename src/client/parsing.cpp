@@ -18,12 +18,13 @@ std::vector<std::string> splitCommands(const std::string &message) {
 }
 
 void Server::handleClientMessage(int clientSocket) {
-    char buffer[BUFFER_SIZE * BUFFER_SIZE] = {0};
+    char buffer[BUFFER_SIZE] = {0}; // why bf * bf?
     memset(buffer, 0, sizeof(buffer));
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead <= 0) {
         close(clientSocket);
     } else {
+        // verificar a pass do server?
         std::vector<std::string> commands;
         std::string message(buffer);
         commands = splitCommands(message);
@@ -61,13 +62,8 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hModeCmd(iss, it);
     } else if (command == "WHO") {
         hWhoCmd(iss, it);
-    }else if(command == "PASS"){
-        std::string password;
-        iss >> password;
-        if(this->password != password){
-            sendMsg(ERR_PASSWDMISMATCH(), it->first);
-            close(it->first);
-        }
+    }else if (command == "PASS") { //changed
+        hPassCmd(iss, it);
     }else
         return;
 }
@@ -82,7 +78,7 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string username;
     iss >> username;
     it->second->setUser(username);
-    sendMsg(RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick()), it->first);
+    // channel->sendMsg(RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick()), it->first);
 }
 
 std::string getRole(std::map<Client *, bool>::iterator it){
@@ -99,34 +95,11 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    Channel *channel= findOrCreateChannel(channelName);
     for(clientIt = channel->admins.begin(); clientIt != channel->admins.end(); clientIt++){
         if(it->second->getNick() != clientIt->first->getNick())
-            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + clientIt->first->getNick() + "\r\n", it->first);
+            channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + clientIt->first->getNick() + "\r\n", it->first);
         else
-            sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + it->second->getNick() + "\r\n", it->first);
+            channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + it->second->getNick() + "\r\n", it->first);
     }
-   sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
-}
-
-// Testar os modes
-void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string channelName, pass;
-    iss >> channelName;
-    bool isChannel = (channelName[0] == '#');
-    std::vector<Client *>::iterator clientIt;
-    if(isChannel){
-        Channel *channel = findOrCreateChannel(channelName);  // Get or create the channel from the server
-        if(validateChannelModes(iss, it, channel) == false)
-        {
-            if(channel->admins.size() == 0)
-                channel->addClient(it->second, true);
-            std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
-            channel->addClient(it->second);
-            sendMsg(message, it->first);
-            notifyAllInChannel(channel, message);
-        }
-    }
-    else
-        std::cout << channelName << " is not channel" << std::endl;
+   channel->sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -135,13 +108,7 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> channelName;
 
     Channel* channel = findOrCreateChannel(channelName);
-    if (!channel) {
-        std::cout << "Channel not found: " << channelName << "\n";
-        return;
-    }
 
-    // Remove client from list
-    channel->removeClient(it->second);
     std::cout << "Client " << it->second->getSocket() << " left channel " << channelName << "\n";
 
     // If the channel is now empty, remove it from the server's channels map
@@ -149,13 +116,12 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
           // Use the new removeChannel() method
     }
     std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PART " + channelName + "\r\n";
-    notifyAllInChannel(channel, message);
+    channel->notifyAllInChannel(channel, message);
     mapIterator = channel->admins.find(it->second);
     (*mapIterator).second = false;
     mapIterator++;
     (*mapIterator).second = true;
 }
-
 
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, message;
@@ -171,7 +137,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         }
         for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
             if (it->second != channelMap->first) {
-                sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", channelMap->first->getSocket());
+                channel->sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", channelMap->first->getSocket());
             }
         }
         std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
@@ -179,7 +145,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         std::map<int, Client*>::iterator clientIt = clients.begin();
         while(clientIt != clients.end()){
             if(target == clientIt->second->getNick())
-                sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
+                // channel->sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
             clientIt++;
         }
     }
@@ -201,8 +167,8 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     std::cout << "Client " << it->second->getSocket() << " invited " << target << " to channel " << targetChannel << "\n";
     std::string inviting = RPL_INVITING(user_info(it->second->getNick(), it->second->getUser()), target, targetChannel);
     std::string msg = RPL_INVITE(user_info(it->second->getNick(), it->second->getUser()), target, targetChannel);
-    notifyAllInChannel(channel, inviting);
-    sendMsg(msg, client->getSocket());
+    channel->notifyAllInChannel(channel, inviting);
+    channel->sendMsg(msg, client->getSocket());
 }
 
 void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -211,41 +177,3 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
     std::cout << "Client " << it->second->getSocket() << " set channel topic to: " << topic << "\n";
 }
 
-void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string channelName, mode, target;
-    std::string message;
-    iss >> channelName >> mode >> target;
-    Channel* channel = findOrCreateChannel(channelName);
-    if (!channel) {
-        std::cout << "Channel " << channelName << " not found.\n";
-        return;
-    }
-    if(mode == "+o"){
-        std::map<Client *, bool>::iterator channelMap = channel->admins.find(it->second);
-        if(channelMap->second == true){
-            Client *client = getClient(target);
-            channelMap = channel->admins.find(client);
-            if(channelMap == channel->admins.end()){
-                std::cout << "Client not found in channel" << std::endl;
-                message = ERR_NOOPERHOST(it->second->getNick(), channel->name);
-                sendMsg(message, it->first);
-            }
-            else if(channelMap->second == true){
-                message = ":localhost 491 " + it->second->getNick() + " " + channel->name + " :\00304You're already an admin!\00304\r\n";
-                sendMsg(message, it->first);
-            }
-            else{
-                message = RPL_YOUREOPER(target, channel->name);
-                channelMap->second = true;
-                sendMsg(message ,client->getSocket());
-                message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost MODE " + channel->name + " +o " + target + "\r\n";
-                notifyAllInChannel(channel, message);
-            }
-        }
-        else{
-            message = ":localhost 481 " + it->second->getNick() + " :You're not an admin!\r\n";
-            sendMsg(message, it->first);
-        }
-    }
-    channel->applyMode(iss, mode);
-}

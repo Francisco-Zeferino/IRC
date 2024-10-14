@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/14 15:30:14 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/14 15:59:00 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void Server::listenSocket(){
     }
 }
 
-void Server::setEpoll(){
+void Server::setEpoll() {
     int epollfd = epoll_create1(0);
     int nfds;
     struct epoll_event event;
@@ -72,7 +72,7 @@ void Server::setEpoll(){
         return ;
     }
     struct epoll_event clientEvent[1024];
-    while(1){
+    while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
         if(nfds == -1){
             std::cerr << "Error during epoll wait" << std::endl;
@@ -99,86 +99,39 @@ Client* Server::getClient(const std::string user){
     return NULL;
 }
 
-void Server::notifyAllInChannel(Channel *channel, std::string message){
-    std::map<Client *, bool>::iterator it;
-    it = channel->admins.begin();
-    while(it != channel->admins.end()){
-        sendMsg(message,it->first->getSocket());
-        it++;
-    }
-}
-
-bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel){
-    std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channel->name + "\r\n";
-    if(channel->hasMode('i')){
-        if(channel->validateUserJoin(it->second->getNick())){
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
-            channel->addClient(it->second);
-            notifyAllInChannel(channel, message);
-            return true;
-        }
-        else{
-            std::cout << "Can't join Channel, not invited!" << std::endl;
-            return true;
-        }
-    }
-    else if(channel->hasMode('k')){
-        std::string password;
-        iss >> password;
-        std::cout << channel->password << std::endl;
-        if(channel->password == password){
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
-            channel->addClient(it->second);
-            sendMsg(message, it->first);
-            return true;
-        }
-        else{
-            std::cout << "Wrong password!" << std::endl;
-            return true;
-        }
-    }
-    else if(channel->hasMode('l')){
-        if(channel->admins.size() >= channel->userslimit){
-            std::string message = ERR_CHANNELISFULL(it->second->getNick(), channel->name);
-            sendMsg(message,it->first);
-            return true;
-        }
-        else{
-            std::cout << "Client " << it->second->getSocket() << " joined channel " << channel->name << "\n";
-            channel->addClient(it->second);
-            sendMsg(message, it->first);
-            return true;
-        }
-    }
-    return false;
-}
 
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
-    for(it = serverChannels.begin(); it != serverChannels.end(); it++){
-        if((*it)->name == channelName)
-            break;
+    for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
+        if ((*it)->name == channelName) {
+            return *it;
+        }
     }
-    if (it == serverChannels.end()) {
-        std::cout << "Channel not found, creating new channel: " << channelName << "\n";
-        Channel* newChannel = new Channel(channelName);
-        serverChannels.push_back(newChannel);
-        std::cout << "Channel created: " << channelName << "\n";
-        return newChannel;
-    }
-    return *it;
+
+    std::cout << "Channel not found, creating new channel: " << channelName << "\n";
+    Channel* newChannel = new Channel(channelName);
+
+    newChannel->setMode("+t");
+    newChannel->setMode("+o");
+
+    serverChannels.push_back(newChannel);
+    std::cout << "Channel created: " << channelName << " with default modes: +t +o\n";
+    return newChannel;
 }
 
-// void Server::removeChannel(const std::string& channelName) {
-//     std::map<std::string, Channel*>::iterator it = channels.find(channelName);
-//     if (it != channels.end()) {
-//         delete it->second;
-//         channels.erase(it);
-//         std::cout << "Channel " << channelName << " removed from server.\n";
-//     } else {
-//         std::cout << "Channel " << channelName << " not found.\n";
-//     }
-// }
+// update no remove
+void Server::removeChannel(const std::string& channelName) {
+    std::vector<Channel*>::iterator it;
+    for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
+        if ((*it)->name == channelName) {
+            delete *it;
+            serverChannels.erase(it);
+            std::cout << "Channel " << channelName << " removed from server.\n";
+            return;
+        }
+    }
+    std::cout << "Channel " << channelName << " not found.\n";
+}
 
 void Server::setConnection(int epollfd){
     size_t serverAddrSize = sizeof(serverAddr);
@@ -193,6 +146,3 @@ void Server::setConnection(int epollfd){
     clients.insert(std::pair<int, Client*>(connection, new Client(connection)));
 }
 
-void Server::sendMsg(const std::string &msg, int clientSocket) const {
-    send(clientSocket, msg.c_str(), msg.length(), 0);
-}

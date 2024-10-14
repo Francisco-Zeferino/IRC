@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/11 18:40:04 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/14 11:00:28 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +27,19 @@
 class Client;
 class Channel;
 
+
+
 class Server
 {
     private :
         int connection;
         int serverSocket;
         char *_port;
+        
         char *password;
         sockaddr_in serverAddr;
         std::map<int, Client* > clients;            //Clients connected to server
-        std::vector<Channel* > serverChannels;   //Channels on sever
+        std::vector<Channel* > serverChannels;      //Channels on sever
 
         void setEpoll();
         void createSocket();
@@ -46,7 +49,8 @@ class Server
         void handleClientMessage(int clientSocket);
         bool validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel);
         Client *getClient(const std::string user);
-        void notifyAllInChannel(Channel *channel, std::string message);
+
+        // Command handling
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
         void hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
@@ -58,7 +62,9 @@ class Server
         void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        void sendMsg(const std::string &msg, int clientSocket) const;
+        void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        
+        
     public:
         Server();
         ~Server();

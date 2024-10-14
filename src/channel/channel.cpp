@@ -12,7 +12,7 @@ void Channel::setTopic(const std::string &newTopic) {
     this->topic = newTopic;
 }
 
-void Channel::setMode(const std::string& newMode) {
+void Channel::setMode(const std::string &newMode) {
     if (newMode[0] == '+') {
         if (mode.find(newMode[1]) == std::string::npos) {
             mode += newMode[1];
@@ -29,15 +29,26 @@ bool Channel::hasMode(char modeChar) const {
     return mode.find(modeChar) != std::string::npos;
 }
 
-void Channel::addClient(Client* client, bool isOperator) {
+void Channel::addClient(Client *client, bool isOperator) {
     admins.insert(std::make_pair(client, isOperator));
 }
 
-void Channel::removeClient(Client* client) {
-    (void)client;
+void Channel::removeClient(Client *client) {
+    admins.erase(client); // erase
 }
 
-bool Channel::validateUserJoin(const std::string user){
+bool Channel::isAdmin(Client* client) {
+    std::map<Client *, bool>::iterator it;
+
+    it = admins.find(client);
+    if(it->second == true) {
+        return true;
+    }
+    else
+        return false;
+}
+
+bool Channel::validateUserJoin(const std::string user) {
     std::vector<std::string>::iterator it;
     for(it = invUsers.begin(); it != invUsers.end(); it++){
         if(*it == user)
@@ -46,16 +57,15 @@ bool Channel::validateUserJoin(const std::string user){
     return false;
 }
 
-void Channel::applyMode(std::stringstream &iss, const std::string mode) {
-    if (mode[0] == '+') {
-        setMode(mode);
-        if(this->mode == "k")
-            iss >> password;
-        else if(this->mode == "l")
-            iss >> userslimit;
-        std::cout << "Mode " << mode << " applied to channel " << name << "\n";
-    } else if (mode[0] == '-') {
-        setMode(mode);
-        std::cout << "Mode " << mode << " removed from channel " << name << "\n";
+void Channel::sendMsg(const std::string &msg, int clientSocket) {
+    send(clientSocket, msg.c_str(), msg.length(), 0);
+}
+
+void Channel::notifyAllInChannel(Channel *channel, std::string message){
+    std::map<Client *, bool>::iterator it;
+    it = channel->admins.begin();
+    while(it != channel->admins.end()) {
+        sendMsg(message,it->first->getSocket());
+        it++;
     }
 }
