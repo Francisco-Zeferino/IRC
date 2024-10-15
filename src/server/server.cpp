@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/15 13:04:10 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/15 15:36:07 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void Server::epollState(int epollfd, int socket, uint32_t newEvent){
 
 void Server::setEpoll() {
     epollfd = epoll_create1(0);
-    event.events = EPOLLIN | EPOLLOUT;
+    event.events = EPOLLIN;
     event.data.fd = serverSocket;
     if(epollfd == -1){
         std::cerr << "Error creating epoll" << std::endl;
@@ -87,11 +87,12 @@ void Server::setEpoll() {
             return;
         }
         for(int i = 0; i < nfds; i++){
-            if(clientEvent[i].events & EPOLLIN){
-                if(clientEvent[i].data.fd == serverSocket)
-                    setConnection(epollfd);
-                else
-                    handleClientMessage(clientEvent[i].data.fd);
+            if(clientEvent[i].data.fd == serverSocket)
+                setConnection(epollfd);
+            else{
+                epollState(epollfd, clientEvent[i].data.fd, EPOLLOUT);
+                handleClientMessage(clientEvent[i].data.fd);
+                epollState(epollfd, clientEvent[i].data.fd, EPOLLIN);
             }
         }
     }
@@ -147,7 +148,7 @@ void Server::setConnection(int epollfd){
         exit(1);
     }
     static struct epoll_event connectionEvent;
-    connectionEvent.events = EPOLLIN | EPOLLOUT;
+    connectionEvent.events = EPOLLIN;
     connectionEvent.data.fd = connection;
     fcntl(connection, F_SETFL, O_NONBLOCK);
     epoll_ctl(epollfd, EPOLL_CTL_ADD, connection, &connectionEvent);

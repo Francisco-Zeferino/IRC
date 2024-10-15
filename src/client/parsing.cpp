@@ -37,11 +37,11 @@ void Server::handleClientMessage(int clientSocket) {
     clientMessage = getClientMessage(clientSocket, bytesRead);
     if (bytesRead <= 0) {
         close(clientSocket);
+        return;
     } else {
         std::vector<std::string> commands;
         std::string message(clientMessage);
         commands = splitCommands(message);
-        epollState(epollfd, clientSocket, EPOLLOUT);
         std::map<int, Client*>::iterator it = clients.find(clientSocket);
         if (it != clients.end())
             for (size_t i = 0; i < commands.size(); ++i) {
@@ -50,7 +50,6 @@ void Server::handleClientMessage(int clientSocket) {
         else
             std::cout << "Client not found for socket " << clientSocket << std::endl;
     }
-    epollState(epollfd, clientSocket, EPOLLIN);
 }
 
 void Server::parseMessage(const std::string &message, std::map<int, Client*>::iterator it) {

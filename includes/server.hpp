@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/15 12:57:56 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/15 15:33:16 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <sys/epoll.h>
+#include <errno.h>
 #include "numeric_responses.hpp"
 
 class Client;
