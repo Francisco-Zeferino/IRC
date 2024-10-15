@@ -17,11 +17,10 @@ std::vector<std::string> splitCommands(const std::string &message) {
     return commands;
 }
 
-void Server::handleClientMessage(int clientSocket) {
+std::string getClientMessage(int clientSocket, int &bytesRead) {
     char buffer[BUFFER_SIZE] = {0};
-    std::string tmp;
     bool stopLoop = false;
-    int bytesRead;
+    std::string tmp;
     while(!stopLoop){
         memset(buffer, 0, sizeof(buffer));
         bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
@@ -29,13 +28,20 @@ void Server::handleClientMessage(int clientSocket) {
         if(tmp.find('\n') != std::string::npos)
             stopLoop = true;
     }
+    return tmp;
+}
+
+void Server::handleClientMessage(int clientSocket) {
+    std::string clientMessage;
+    int bytesRead;
+    clientMessage = getClientMessage(clientSocket, bytesRead);
     if (bytesRead <= 0) {
         close(clientSocket);
     } else {
         std::vector<std::string> commands;
-        std::string message(tmp);
-        tmp.clear();
+        std::string message(clientMessage);
         commands = splitCommands(message);
+        epollState(epollfd, clientSocket, EPOLLOUT);
         std::map<int, Client*>::iterator it = clients.find(clientSocket);
         if (it != clients.end())
             for (size_t i = 0; i < commands.size(); ++i) {
@@ -44,6 +50,7 @@ void Server::handleClientMessage(int clientSocket) {
         else
             std::cout << "Client not found for socket " << clientSocket << std::endl;
     }
+    epollState(epollfd, clientSocket, EPOLLIN);
 }
 
 void Server::parseMessage(const std::string &message, std::map<int, Client*>::iterator it) {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/14 11:00:28 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/15 12:57:56 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,23 @@ class Server
         
         char *password;
         sockaddr_in serverAddr;
+        int epollfd;
+        int nfds;
+        epoll_event event;
         std::map<int, Client* > clients;            //Clients connected to server
         std::vector<Channel* > serverChannels;      //Channels on sever
 
+        //Socket Management
         void setEpoll();
         void createSocket();
         void bindSocket();
         void listenSocket();
         void setConnection(int epollfd);
+
+        //Epoll state management
+        void epollState(int epollfd, int socket, uint32_t newEvent);
+
+        //Client management
         void handleClientMessage(int clientSocket);
         bool validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel);
         Client *getClient(const std::string user);
