@@ -15,7 +15,7 @@ void Channel::setTopic(const std::string &newTopic, Client* requester) {
     }
 
     topic = newTopic;
-    std::string message = ":localhost TOPIC " + name + " :" + newTopic + "\r\n";
+    std::string message = ":localhost TOPIC " + name + newTopic + "\r\n";
     notifyAllInChannel(this, message);
 }
 
@@ -75,4 +75,8 @@ void Channel::notifyAllInChannel(Channel *channel, std::string message){
         sendMsg(message,it->first->getSocket());
         it++;
     }
+}
+
+std::string Channel::getTopic() const {
+    return topic.empty() ? "No topic is set" : topic;
 }

@@ -185,18 +185,18 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
     }
 
     // If no new topic is provided, return the current topic
-    // if (iss.rdbuf()->in_avail() == 0) {
-    //     std::string currentTopic = channel->getTopic();
-    //     if (currentTopic == "No topic is set") {
-    //         channel->sendMsg(RPL_NOTOPIC(it->second->getNick(), channelName), it->first);
-    //     } else {
-    //         channel->sendMsg(RPL_TOPIC(it->second->getNick(), channelName, currentTopic), it->first);
-    //     }
-    //     return;
-    // }
+    if (iss.rdbuf()->in_avail() == 0) {
+        std::string currentTopic = channel->getTopic();
+        if (currentTopic == "No topic is set") {
+            channel->sendMsg(RPL_NOTOPIC(it->second->getNick(), channelName), it->first);
+        } else {
+            channel->sendMsg(RPL_TOPIC(it->second->getNick(), channelName, currentTopic), it->first);
+        }
+        return;
+    }
 
-    // // If new topic is provided, attempt to set it
-    // std::getline(iss, newTopic);
-    // newTopic = newTopic.substr(1);  // Remove leading space
-    // channel->setTopic(newTopic, it->second);
+    std::getline(iss, newTopic);
+    newTopic = newTopic.substr(1); 
+    channel->setTopic(newTopic, it->second);
+    //notify
 }

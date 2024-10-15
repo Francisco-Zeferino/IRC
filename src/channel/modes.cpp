@@ -35,7 +35,7 @@ void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* 
             aUserLimitMode(iss, modeSign == '+');
             break;
         case 't':
-            // +t
+            aTopicMode(modeSign == '+');
             break;
         default:
             sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
@@ -142,8 +142,27 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
         }
     }
 
-    std::cout << "Limits atm: " << userslimit << ".\n";
+    // std::cout << "Limits atm: " << userslimit << ".\n";
     // std::string modeChangeMsg = ":localhost MODE " + name + << " (userslimit) : " -l") + "\r\n";
     // notifyAllInChannel(this, modeChangeMsg);
 }
 
+void Channel::aTopicMode(bool enable) {
+    if (enable) {
+        if (!hasMode('t')) {
+            mode += 't';
+            std::cout << "Topic protection enabled for channel " << name << "\n";
+        } else {
+            std::cout << "Topic protection is already enabled for channel " << name << "\n";
+        }
+    } else {
+        if (hasMode('t')) {
+            mode.erase(mode.find('t'), 1);
+            std::cout << "Topic protection disabled for channel " << name << "\n";
+        } else {
+            std::cout << "Topic protection is already disabled for channel " << name << "\n";
+        }
+    }
+    std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +t" : " -t") + "\r\n";
+    notifyAllInChannel(this, modeChangeMsg);
+}

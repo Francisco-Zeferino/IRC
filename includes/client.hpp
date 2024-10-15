@@ -7,7 +7,6 @@
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 1024
 
-class Server;
 class Channel;
 
 class Client

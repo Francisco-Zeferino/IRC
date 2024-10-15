@@ -22,6 +22,7 @@ class Channel {
 
         // Chanel management
         void setTopic(const std::string &newTopic, Client* requester);
+        std::string getTopic() const; //new
         void setMode(const std::string &newMode);
         void setPassword(const std::string password);
         bool hasMode(char mode) const;
@@ -30,14 +31,15 @@ class Channel {
         // Modes
         void applyMode(std::stringstream &iss, const std::string mode, Client *requester);
         bool isAdmin(Client *client);
-        void aOperatorMode(std::stringstream &iss, bool addOperator, Client* requester);
+        void aOperatorMode(std::stringstream &iss, bool addOperator, Client *requester);
         void aInviteOnlyMode(bool enable);
         void aPasswordMode(std::stringstream &iss, bool enable);
         void aUserLimitMode(std::stringstream &iss, bool enable);
+        void aTopicMode(bool enable);
 
         //Client management
-        void addClient(Client* client, bool isOperator = false);
-        void removeClient(Client* client);
+        void addClient(Client *client, bool isOperator = false);
+        void removeClient(Client *client);
 
         void sendMsg(const std::string &msg, int clientSocket);
         void notifyAllInChannel(Channel *channel, std::string message);
