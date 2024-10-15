@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/15 15:33:16 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/15 18:24:35 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <csignal>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -51,7 +52,8 @@ class Server
         void bindSocket();
         void listenSocket();
         void setConnection(int epollfd);
-
+        static void handleSignal(int signal);
+        
         //Epoll state management
         void epollState(int epollfd, int socket, uint32_t newEvent);
 

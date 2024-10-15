@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/15 15:36:07 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/15 18:28:18 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,14 @@
 Server::Server(){}
 
 Server::~Server() {
+    std::cout << "Closing server\n";
+    close(serverSocket);
+    close(epollfd);
+    while(!clients.empty()) {
+        close(clients.begin()->first);
+        delete clients.begin()->second;
+        clients.erase(clients.begin());
+    }
     // for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it) {
     //     delete it->second;
     // }
@@ -66,7 +74,14 @@ void Server::epollState(int epollfd, int socket, uint32_t newEvent){
     }
 }
 
+void Server::handleSignal(int signal){
+    (void)signal;
+    throw std::runtime_error("Caught signal SIGINT");
+}
+
 void Server::setEpoll() {
+
+    signal(SIGINT, handleSignal);
     epollfd = epoll_create1(0);
     event.events = EPOLLIN;
     event.data.fd = serverSocket;

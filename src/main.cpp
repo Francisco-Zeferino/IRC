@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: struf <struf@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:01:10 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/13 13:48:04 by struf            ###   ########.fr       */
+/*   Updated: 2024/10/15 18:28:39 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,11 @@ int main(int argc, char **argv)
         return 1;
     }
     else {
-        Server server;
-        server.setupServer(argv[1], argv[2]);
-        return 0;
+        try{
+            Server server;
+            server.setupServer(argv[1], argv[2]);
+        }catch(std::exception &e){
+            return 1;
+        }
     }
 }
