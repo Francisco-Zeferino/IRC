@@ -30,5 +30,8 @@ re : fclean all
 run:
 	make re && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes \
 	./ircserv 8080 123
+	
+trace_epoll:
+	make re && strace -e epoll_ctl,epoll_wait ./ircserv 8080 123
 
 .PHONY: all clean fclean re

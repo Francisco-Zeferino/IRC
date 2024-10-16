@@ -7,26 +7,40 @@ std::vector<std::string> splitCommands(const std::string &message) {
     std::string::size_type start = 0;
     std::string::size_type end = 0;
 
-    while ((end = message.find("\r\n", start)) != std::string::npos) {
+    while ((end = message.find("\n", start)) != std::string::npos) {
         std::string command = message.substr(start, end - start);
         if (!command.empty()) {
             commands.push_back(command);
         }
-        start = end + 2;
+        start = end + 1;
     }
     return commands;
 }
 
+std::string getClientMessage(int clientSocket, int &bytesRead) {
+    char buffer[BUFFER_SIZE] = {0};
+    bool stopLoop = false;
+    std::string tmp;
+    while(!stopLoop){
+        memset(buffer, 0, sizeof(buffer));
+        bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        tmp.append(std::string(buffer));
+        if(tmp.find('\n') != std::string::npos)
+            stopLoop = true;
+    }
+    return tmp;
+}
+
 void Server::handleClientMessage(int clientSocket) {
-    char buffer[BUFFER_SIZE] = {0}; // why bf * bf?
-    memset(buffer, 0, sizeof(buffer));
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    std::string clientMessage;
+    int bytesRead;
+    clientMessage = getClientMessage(clientSocket, bytesRead);
     if (bytesRead <= 0) {
         close(clientSocket);
+        return;
     } else {
-        // verificar a pass do server?
         std::vector<std::string> commands;
-        std::string message(buffer);
+        std::string message(clientMessage);
         commands = splitCommands(message);
         std::map<int, Client*>::iterator it = clients.find(clientSocket);
         if (it != clients.end())
@@ -80,7 +94,9 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string username;
     iss >> username;
     it->second->setUser(username);
-    // channel->sendMsg(RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick()), it->first);
+    std::string msg = RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick());
+    send(it->first, msg.c_str(), msg.length(), 0);
+    //channel->sendMsg(RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick()), it->first);
 }
 
 std::string getRole(std::map<Client *, bool>::iterator it){

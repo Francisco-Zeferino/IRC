@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/14 13:06:06 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/16 09:12:53 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,14 @@
 Server::Server(){}
 
 Server::~Server() {
+    std::cout << "Closing server\n";
+    close(serverSocket);
+    close(epollfd);
+    while(!clients.empty()) {
+        close(clients.begin()->first);
+        delete clients.begin()->second;
+        clients.erase(clients.begin());
+    }
     // for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it) {
     //     delete it->second;
     // }
@@ -44,38 +52,63 @@ void Server::createSocket(){
 
 void Server::bindSocket(){
     if(bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0){
-        std::cout << "Error binding socket" << std::endl;
+        std::cerr << "Error binding socket" << std::endl;
         exit(1);
     }
 }
 
 void Server::listenSocket(){
     if(listen(serverSocket, MAX_CLIENTS) < 0){
-        std::cout << "Error listening on socket" << std::endl;
+        std::cerr << "Error listening on socket" << std::endl;
         exit(1);
     }
 }
 
+void Server::epollState(int epollfd, int socket, uint32_t newEvent){
+    static struct epoll_event event;
+    event.events = newEvent;
+    event.data.fd = socket;
+    if(epoll_ctl(epollfd, EPOLL_CTL_MOD, socket, &event)){
+        std::cerr << "Error modifying epoll state" << std::endl;
+        return ;
+    }
+}
+
+void Server::handleSignal(int signal){
+    (void)signal;
+    throw std::runtime_error("Caught signal SIGINT");
+}
+
 void Server::setEpoll() {
-    int epollfd = epoll_create1(0);
-    int nfds;
-    struct epoll_event event;
+
+    signal(SIGINT, handleSignal);
+    epollfd = epoll_create1(0);
     event.events = EPOLLIN;
     event.data.fd = serverSocket;
-    
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event) == -1) {
-        std::cerr << "Error adding connection to epoll\n";
-        return;
+    if(epollfd == -1){
+        std::cerr << "Error creating epoll" << std::endl;
+        return ;
     }
-    
+
+    if(epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event)){
+        std::cout << "Failed to add file descriptor to epoll" << std::endl;
+        return ;
+    }
     struct epoll_event clientEvent[1024];
     while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
+        if(nfds == -1){
+            std::cerr << "Error during epoll wait" << std::endl;
+            return;
+        }
         for(int i = 0; i < nfds; i++){
             if(clientEvent[i].data.fd == serverSocket)
                 setConnection(epollfd);
-            else
+            else{
+                epollState(epollfd, clientEvent[i].data.fd, EPOLLOUT);
                 handleClientMessage(clientEvent[i].data.fd);
+                epollState(epollfd, clientEvent[i].data.fd, EPOLLIN);
+            }
         }
     }
 }
@@ -132,6 +165,7 @@ void Server::setConnection(int epollfd){
     static struct epoll_event connectionEvent;
     connectionEvent.events = EPOLLIN;
     connectionEvent.data.fd = connection;
+    fcntl(connection, F_SETFL, O_NONBLOCK);
     epoll_ctl(epollfd, EPOLL_CTL_ADD, connection, &connectionEvent);
     clients.insert(std::pair<int, Client*>(connection, new Client(connection)));
 }
