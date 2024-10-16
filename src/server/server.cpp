@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/15 18:28:18 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/16 11:23:34 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,10 +133,12 @@ Channel* Server::findOrCreateChannel(const std::string& channelName) {
 
     std::cout << "Channel not found, creating new channel: " << channelName << "\n";
     Channel* newChannel = new Channel(channelName);
-
+    if(newChannel == NULL) {
+        std::cout << "Error creating channel\n";
+        return NULL;
+    }
     newChannel->setMode("+t");
     newChannel->setMode("+o");
-
     serverChannels.push_back(newChannel);
     std::cout << "Channel created: " << channelName << " with default modes: +t +o\n";
     return newChannel;

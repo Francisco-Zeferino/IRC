@@ -10,7 +10,7 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     bool isChannel = (channelName[0] == '#');
     if (isChannel) {
         Channel* channel = findOrCreateChannel(channelName);
-        
+    
         if (validateChannelModes(iss, it, channel)) {
             return;
         }

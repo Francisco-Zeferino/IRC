@@ -6,7 +6,13 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, mode;
     iss >> channelName >> mode;
 
+
     Channel* channel = findOrCreateChannel(channelName);
+
+    if(mode.empty()){
+        channel->sendMsg(ERR_UNKNOWNMODE(it->second->getNick(), mode), it->first);
+        return;
+    }
 
     if (!channel->isAdmin(it->second)) {
         channel->sendMsg(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channelName), it->first);
@@ -118,6 +124,7 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
             userslimit = newLimit;
             mode = "l";
             std::cout << "User limit set to " << userslimit << " for channel: " << name << std::endl;
+            notifyAllInChannel(this, ":localhost " + iss.str() + "\r\n");
         } else {
             std::cout << "Invalid user limit provided.\n";
             return; //add
@@ -127,13 +134,13 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
             mode.erase(mode.find('l'), 1);
             userslimit = 0;
             std::cout << "User limit mode disabled for channel " << name << "\n";
+            notifyAllInChannel(this, ":localhost MODE " + name + " -l\r\n");
         } else {
             std::cout << "User limit mode not set, cannot disable.\n";
             return;
         }
     }
 
-    std::cout << "Limits atm: " << userslimit << ".\n";
     // std::string modeChangeMsg = ":localhost MODE " + name + << " (userslimit) : " -l") + "\r\n";
     // notifyAllInChannel(this, modeChangeMsg);
 }

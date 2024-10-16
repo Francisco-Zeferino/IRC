@@ -160,8 +160,11 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
     } else {
         std::map<int, Client*>::iterator clientIt = clients.begin();
         while(clientIt != clients.end()){
-            if(target == clientIt->second->getNick())
-                // channel->sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
+            //channel->sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
+            if(target == clientIt->second->getNick()){
+                std::string msg = RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message);
+                send(clientIt->first, msg.c_str(), msg.length(), 0);
+            }
             clientIt++;
         }
     }
