@@ -18,11 +18,11 @@ class Channel {
 
         std::map<Client *, bool> admins;
         std::vector<std::string> invUsers;
-        std::vector<std::string> bannedUsers;
+        std::vector<std::string> bannedUsers; //Nao precisamos
 
         // Chanel management
         void setTopic(const std::string &newTopic, Client* requester);
-        std::string getTopic() const; //new
+        std::string getTopic() const;
         void setMode(const std::string &newMode);
         void setPassword(const std::string password);
         bool hasMode(char mode) const;
@@ -41,6 +41,7 @@ class Channel {
         void addClient(Client *client, bool isOperator = false);
         void removeClient(Client *client);
 
+        // Comunication
         void sendMsg(const std::string &msg, int clientSocket);
         void notifyAllInChannel(Channel *channel, std::string message);
 

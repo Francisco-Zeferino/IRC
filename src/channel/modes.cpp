@@ -39,35 +39,31 @@ void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* 
             break;
         default:
             sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
-            break; 
+            break; // testar
     }
 }
 
 void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *requester) {
-    // Extract the target nickname from the stream
     std::string targetNick;
     iss >> targetNick;
 
-    // Search the channel's admin map for the target client
-    Client* targetClient = NULL;
+    Client* targetClient = NULL; ///corigir esta verificacao + if
     for (std::map<Client*, bool>::iterator it = admins.begin(); it != admins.end(); ++it) {
         if (it->first->getNick() == targetNick) {
             targetClient = it->first;
             break;
         }
     }
-    // If the target client is not found in the channel
     if (!targetClient) {
         sendMsg(ERR_NOOPERHOST(requester->getNick(), name), requester->getSocket());
         return;
     }
-    // Prevent self-removal of operator status
+    // Defense for self removal op
     if (targetClient == requester && !addOperator) {
         std::string message = ":localhost 481 " + requester->getNick() + " " + name + " :\00304You cannot remove your own operator status!\00304\r\n";
         sendMsg(message, requester->getSocket());
         return;
     }
-    // Check if the operator status is already what we're trying to set
     if (admins[targetClient] == addOperator) {
         std::string message = addOperator 
             ? ERR_USERISALREADYOP(requester->getNick(), name) 
@@ -75,7 +71,6 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
         sendMsg(message, requester->getSocket());
         return;
     }
-    // Update the operator status for the target client
     admins[targetClient] = addOperator;
     std::string modeChangeMsg = ":localhost MODE " + name + (addOperator ? " +o " : " -o ") + targetNick + "\r\n";
     notifyAllInChannel(this, modeChangeMsg);

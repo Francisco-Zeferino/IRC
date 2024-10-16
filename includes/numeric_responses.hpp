@@ -10,10 +10,10 @@
 #define RPL_OPGIVEN(nick, target, channel) (":localhost 324 " + nick + " " + target + " " + channel + " :\00303" + target + " is now a channel operator\00303\r\n")
 // Successful operator demotion
 #define RPL_OPREMOVED(nick, target, channel) (":localhost 324 " + nick + " " + target + " " + channel + " :\00303" + target + " is no longer a channel operator\00303\r\n")
-// 
-#define RPL_TOPIC(nick, channel, topic) (":localhost 332 " + nick + " " + channel + " :" + topic + "\r\n")
-// 
-#define RPL_NOTOPIC(nick, channel) (":localhost 331 " + nick + " " + channel + " :No topic is set\r\n")
+// Reply for a channel with a topic set
+#define RPL_TOPIC(nick, channel, topic) (":localhost 332 " + nick + " " + channel + " :\00308" + topic + "\r\n")
+// Reply for a channel without a topic set
+#define RPL_NOTOPIC(nick, channel) (":localhost 331 " + nick + " " + channel + " :\00308No topic is set\r\n")
 // 
 #define RPL_YOUREOPER(user, channel) (":localhost 381 " + user + " " + channel + " :\00303You are now an IRC operator\00303\r\n")
 
@@ -45,3 +45,7 @@
 #define ERR_USERISALREADYOP(nick, channel) (":localhost 441 " + nick + " " + channel + " :\00304User is already an operator!\00304\r\n")
 // 
 #define ERR_USERISNOTOP(nick, channel) (":localhost 442 " + nick + " " + channel + " :\00304User is not an operator!\00304\r\n")
+// Error when the nickname is already in use
+#define ERR_NICKNAMEINUSE(nick, newNick) (":localhost 433 " + nick + " " + newNick + " :Nickname is already in use\r\n")
+// Error when the nickname is invalid or contains invalid characters
+#define ERR_ERRONEUSNICKNAME(nick, newNick) (":localhost 432 " + nick + " " + newNick + " :Erroneous nickname\r\n")

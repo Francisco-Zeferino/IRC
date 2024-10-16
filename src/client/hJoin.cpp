@@ -2,7 +2,6 @@
 #include "client.hpp"
 #include "channel.hpp"
 
-// Testar os modes
 void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName;
     iss >> channelName;
@@ -18,17 +17,19 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
         std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
         
-        if (channel->admins.size() == 0) {
+        if (channel->admins.empty()) {
             channel->addClient(it->second, true);
         } else {
             channel->addClient(it->second);
         }
+
         channel->sendMsg(message, it->first);
         channel->notifyAllInChannel(channel, message);
     } else {
         std::cout << channelName << " is not a valid channel name\n";
     }
 }
+
 
 
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel* channel) {

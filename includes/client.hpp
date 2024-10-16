@@ -5,7 +5,7 @@
 #include "channel.hpp"
 
 #define MAX_CLIENTS 100
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 100 //porque alteraste?
 
 class Channel;
 
