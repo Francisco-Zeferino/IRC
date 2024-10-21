@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/15 18:24:35 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/16 11:01:53 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+#include <poll.h>
+#include <fcntl.h> 
+#include <algorithm>
+#include <sstream>
 #include <iostream>
 #include <cstring>
 #include <csignal>
@@ -28,8 +32,6 @@
 
 class Client;
 class Channel;
-
-
 
 class Server
 {
@@ -71,11 +73,12 @@ class Server
         void hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        
+        void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void sendMsgServ(const std::string &msg, int clientSocket) const;
         
     public:
         Server();
@@ -83,9 +86,10 @@ class Server
         
         void setupServer(char *port, char *password);
         
-        // teste
         Channel* findOrCreateChannel(const std::string& channelName);
         void removeChannel(const std::string& channelName);
+        
+        
 };
 
 #endif

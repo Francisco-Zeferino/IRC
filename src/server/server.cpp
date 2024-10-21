@@ -122,7 +122,6 @@ Client* Server::getClient(const std::string user){
     return NULL;
 }
 
-
 Channel* Server::findOrCreateChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
     for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
@@ -144,7 +143,6 @@ Channel* Server::findOrCreateChannel(const std::string& channelName) {
     return newChannel;
 }
 
-// update no remove
 void Server::removeChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
     for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
@@ -170,5 +168,9 @@ void Server::setConnection(int epollfd){
     fcntl(connection, F_SETFL, O_NONBLOCK);
     epoll_ctl(epollfd, EPOLL_CTL_ADD, connection, &connectionEvent);
     clients.insert(std::pair<int, Client*>(connection, new Client(connection)));
+}
+
+void Server::sendMsgServ(const std::string &msg, int clientSocket) const {
+    send(clientSocket, msg.c_str(), msg.length(), 0);
 }
 

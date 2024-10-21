@@ -2,3 +2,12 @@
 /src/test1/
 /objs/
 ircserv
+
+
+
+Comandos:
+TOPIC:
+/mode <#channel> +/-t
+
+/topic <#channel>
+/topic <#channel> [new_topic]

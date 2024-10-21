@@ -8,8 +8,19 @@ void Channel::setPassword(const std::string password){
     this->password = password;
 }
 
-void Channel::setTopic(const std::string &newTopic) {
-    this->topic = newTopic;
+std::string Channel::getTopic() const {
+    return topic;
+}
+
+void Channel::setTopic(const std::string &newTopic, Client* requester) {
+    if (hasMode('t') && !isAdmin(requester)) {
+        sendMsg(ERR_CHANOPRIVSNEEDED(requester->getNick(), name), requester->getSocket());
+        return;
+    }
+
+    topic = newTopic;
+    std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost TOPIC " + name + " :\00308" + newTopic + "\r\n";
+    notifyAllInChannel(this, message);
 }
 
 void Channel::setMode(const std::string &newMode) {
@@ -33,8 +44,18 @@ void Channel::addClient(Client *client, bool isOperator) {
     admins.insert(std::make_pair(client, isOperator));
 }
 
-void Channel::removeClient(Client *client) {
-    admins.erase(client); // erase
+void Channel::removeClient(Client* client) { //updated
+    admins.erase(client);
+
+    std::vector<std::string>::iterator invIt = std::find(invUsers.begin(), invUsers.end(), client->getNick());
+    if (invIt != invUsers.end()) {
+        invUsers.erase(invIt);
+    }
+
+    std::vector<std::string>::iterator banIt = std::find(bannedUsers.begin(), bannedUsers.end(), client->getNick());
+    if (banIt != bannedUsers.end()) {
+        bannedUsers.erase(banIt);
+    }
 }
 
 bool Channel::isAdmin(Client* client) {
@@ -50,6 +71,7 @@ bool Channel::isAdmin(Client* client) {
 
 bool Channel::validateUserJoin(const std::string user) {
     std::vector<std::string>::iterator it;
+    
     for(it = invUsers.begin(); it != invUsers.end(); it++){
         if(*it == user)
             return true;
@@ -63,9 +85,11 @@ void Channel::sendMsg(const std::string &msg, int clientSocket) {
 
 void Channel::notifyAllInChannel(Channel *channel, std::string message){
     std::map<Client *, bool>::iterator it;
+    
     it = channel->admins.begin();
     while(it != channel->admins.end()) {
         sendMsg(message,it->first->getSocket());
         it++;
     }
 }
+

@@ -1,19 +1,12 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-#include <vector>
-#include <map>
-#include <poll.h>
-#include <fcntl.h> 
-#include <algorithm>
-#include <sstream>
 #include "server.hpp"
 #include "channel.hpp"
 
 #define MAX_CLIENTS 100
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 100 //porque alteraste?
 
-class Server;
 class Channel;
 
 class Client

@@ -32,12 +32,3 @@ void Client::setUser(const std::string &username) {
 void Client::setChannel(const std::string &channelname) {
     _channel = channelname;
 }
-
-// Client* Channel::getClient(const std::string& nick) {
-//     for (std::map<Client *, bool>::iterator it = admins.begin(); it != admins.end(); ++it) {
-//         if (it->first->getNick() == nick) {
-//             return it->first;
-//         }
-//     }
-//     return NULL;
-// }
