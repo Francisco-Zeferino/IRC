@@ -23,7 +23,7 @@ int main(int argc, char **argv)
             Server server;
             server.setupServer(argv[1], argv[2]);
         }catch(std::exception &e){
-            return 1;
+            return EXIT_SUCCESS;
         }
     }
 }

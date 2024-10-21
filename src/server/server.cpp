@@ -17,17 +17,7 @@
 Server::Server(){}
 
 Server::~Server() {
-    // std::cout << "Closing server\n";
-    // close(serverSocket);
-    // close(epollfd);
-    // while(!clients.empty()) {
-    //     close(clients.begin()->first);
-    //     delete clients.begin()->second;
-    //     clients.erase(clients.begin());
-    // }
-    // for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it) {
-    //     delete it->second;
-    // }
+    std::cout << "Closing server\n";
     handleQuitOnSignal();
 }
 
@@ -45,12 +35,13 @@ void Server::handleQuitOnSignal(){
         hQuitCmd(iss, it);
         it = nextIt;
     }
+    delete it->second;
+    close(connection);
+    close(epollfd);
+    close(serverSocket);
     for(itChannel = serverChannels.begin(); itChannel != serverChannels.end(); itChannel++){
         delete *itChannel;
     }
-
-    close(epollfd);
-    close(serverSocket);
 }
 
 void Server::setupServer(char *port, char *password){
