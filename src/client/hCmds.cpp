@@ -239,24 +239,25 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
 void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string quitMessage;
     std::getline(iss, quitMessage);
+    std::cout << "QUIT 1\n";
     if (quitMessage.empty()) {
         quitMessage = "Client Quit";
     }
 
     Client* client = it->second;
-
-    for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ++ch) {
-        std::string message = ":" + client->getNick() + "!" + client->getUser() + "@localhost QUIT :" + quitMessage + "\r\n";
+    std::cout << "QUIT 2\n";
+    for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ch++) {
+        std::string message = ":" + client->getNick() + "!" + client->getUser() + "@ " + (*ch)->name  + " QUIT :" + quitMessage + "\r\n";
         (*ch)->notifyAllInChannel(*ch, message);
-        
+        std::cout << "QUIT 3\n";
         (*ch)->removeClient(client);
-
         if ((*ch)->admins.empty() && (*ch)->invUsers.empty()) {
             removeChannel((*ch)->name);
         }
     }
 
     sendMsgServ("ERROR :Closing Link: " + client->getNick() + " (" + quitMessage + ")\r\n", it->first);
+    epoll_ctl(epollfd, EPOLL_CTL_DEL, it->first, NULL);
     close(it->first);  
     clients.erase(it);
     delete client;

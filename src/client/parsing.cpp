@@ -56,6 +56,7 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
     std::stringstream iss(message);
     std::string command;
     iss >> command;
+    epollState(epollfd, it->first, EPOLLOUT);
     if (command == "NICK") {            //wtf
         hNickCmd(iss, it);
     } else if (command == "USER") {     //wtf
@@ -78,8 +79,11 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hWhoCmd(iss, it);
     } else if (command == "PASS") {
         hPassCmd(iss, it);
-    } else if (command == "QUIT") {     //psedo finish
+    } else if (command == "QUIT") {     //pseudo finish
+        std::cout << "QUIT" << std::endl;
         hQuitCmd(iss, it);
+        return ;
     }else
         return;
+    epollState(epollfd, it->first, EPOLLIN);
 }

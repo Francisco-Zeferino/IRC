@@ -35,7 +35,6 @@ void Server::handleQuitOnSignal(){
         hQuitCmd(iss, it);
         it = nextIt;
     }
-    delete it->second;
     close(connection);
     close(epollfd);
     close(serverSocket);
@@ -119,9 +118,7 @@ void Server::setEpoll() {
             if(clientEvent[i].data.fd == serverSocket)
                 setConnection(epollfd);
             else{
-                epollState(epollfd, clientEvent[i].data.fd, EPOLLOUT);
                 handleClientMessage(clientEvent[i].data.fd);
-                epollState(epollfd, clientEvent[i].data.fd, EPOLLIN);
             }
         }
     }
