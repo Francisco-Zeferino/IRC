@@ -17,17 +17,40 @@
 Server::Server(){}
 
 Server::~Server() {
-    std::cout << "Closing server\n";
-    close(serverSocket);
-    close(epollfd);
-    while(!clients.empty()) {
-        close(clients.begin()->first);
-        delete clients.begin()->second;
-        clients.erase(clients.begin());
-    }
+    // std::cout << "Closing server\n";
+    // close(serverSocket);
+    // close(epollfd);
+    // while(!clients.empty()) {
+    //     close(clients.begin()->first);
+    //     delete clients.begin()->second;
+    //     clients.erase(clients.begin());
+    // }
     // for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it) {
     //     delete it->second;
     // }
+    handleQuitOnSignal();
+}
+
+void Server::handleQuitOnSignal(){
+    std::map<int, Client*>::iterator it;
+    std::map<int, Client*>::iterator nextIt;
+    std::vector<Channel*>::iterator itChannel;
+    std::stringstream iss;
+    
+    for(it = clients.begin(); it != clients.end(); it++){
+        nextIt = it;
+        nextIt++;
+        if(nextIt == clients.end())
+            break;
+        hQuitCmd(iss, it);
+        it = nextIt;
+    }
+    for(itChannel = serverChannels.begin(); itChannel != serverChannels.end(); itChannel++){
+        delete *itChannel;
+    }
+
+    close(epollfd);
+    close(serverSocket);
 }
 
 void Server::setupServer(char *port, char *password){
