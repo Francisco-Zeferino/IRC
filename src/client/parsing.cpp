@@ -76,7 +76,7 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hModeCmd(iss, it);
     } else if (command == "WHO") {      //
         hWhoCmd(iss, it);
-    } else if (command == "PASS") {     //corrigir msgs
+    } else if (command == "PASS") {     //finish
         hPassCmd(iss, it);
     } else if (command == "QUIT") {     //psedo finish
         hQuitCmd(iss, it);
