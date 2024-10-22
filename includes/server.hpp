@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/16 11:01:53 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/22 15:32:30 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,9 @@ class Server
         
         void setupServer(char *port, char *password);
         
-        Channel* findOrCreateChannel(const std::string& channelName);
+        Channel* findChannel(const std::string& channelName);
+        Channel* createChannel(const std::string& channelName);
+        // Channel* findOrCreateChannel(const std::string& channelName);
         void removeChannel(const std::string& channelName);
         
         

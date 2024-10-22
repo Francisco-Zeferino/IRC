@@ -70,7 +70,7 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hKickCmd(iss, it);
     } else if (command == "INVITE") {   //finish
         hInviteCmd(iss, it);
-    } else if (command == "TOPIC") {    //finish
+    } else if (command == "TOPIC") {    //finish corrigir -t do op
         hTopicCmd(iss, it);
     } else if (command == "MODE") {     //finish
         hModeCmd(iss, it);
@@ -78,7 +78,7 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hWhoCmd(iss, it);
     } else if (command == "PASS") {     //finish
         hPassCmd(iss, it);
-    } else if (command == "QUIT") {     //psedo finish
+    } else if (command == "QUIT") {     //finish finalisar ctrl c
         hQuitCmd(iss, it);
     }else
         return;

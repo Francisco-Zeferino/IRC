@@ -7,7 +7,11 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> channelName >> mode;
 
 
-    Channel* channel = findOrCreateChannel(channelName);
+    Channel* channel = findChannel(channelName); //alt
+    if (!channel) {
+        std::cout << "Channel not found: " << channelName << "\n";
+        return;
+    }
 
     if(mode.empty()){
         channel->sendMsg(ERR_UNKNOWNMODE(it->second->getNick(), mode), it->first);
