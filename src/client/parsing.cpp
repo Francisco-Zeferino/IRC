@@ -56,16 +56,15 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
     std::stringstream iss(message);
     std::string command;
     iss >> command;
-    epollState(epollfd, it->first, EPOLLOUT);
-    if (command == "NICK") {            //wtf
+    if (command == "NICK") {            //finish
         hNickCmd(iss, it);
-    } else if (command == "USER") {     //wtf
+    } else if (command == "USER") {     //finish
         hUserCmd(iss, it);
-    } else if (command == "JOIN") {     //corigir modeset msg
+    } else if (command == "JOIN") {     //finish
         hJoinCmd(iss, it);
     } else if (command == "PART") {     //finish
         hPartCmd(iss, it);
-    } else if (command == "PRIVMSG") {
+    } else if (command == "PRIVMSG") {  //finish
         hPrivMsgCmd(iss, it);
     } else if (command == "KICK") {     //finish
         hKickCmd(iss, it);
@@ -75,9 +74,9 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hTopicCmd(iss, it);
     } else if (command == "MODE") {     //finish
         hModeCmd(iss, it);
-    } else if (command == "WHO") {
+    } else if (command == "WHO") {      //
         hWhoCmd(iss, it);
-    } else if (command == "PASS") {
+    } else if (command == "PASS") {     //corrigir msgs
         hPassCmd(iss, it);
     } else if (command == "QUIT") {     //pseudo finish
         std::cout << "QUIT" << std::endl;

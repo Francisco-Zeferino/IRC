@@ -1,4 +1,4 @@
-//////////////// REPLY MESSAGES ///////////////
+//////////////////// REPLY MESSAGES ///////////////
 #define user_info(nick, user) (":" + nick + "!" + user + "@localhost")
 //
 #define RPL_WELCOME(user_info, nick)(user_info + " 001 " + nick + " :\00303Welcome to the localhost Network\00303, " + nick + "\r\n")
@@ -14,9 +14,11 @@
 // Reply for a channel with a topic set
 #define RPL_TOPIC(nick, channel, topic) (":localhost 332 " + nick + " " + channel + " :\00308" + topic + "\r\n")
 // Reply for a channel without a topic set
-#define RPL_NOTOPIC(nick, channel) (":localhost 331 " + nick + " " + channel + " :\00308No topic is set\r\n")
+#define RPL_NOTOPIC(nick, channel) (":" + nick + "!" + nick + "@localhost 331 " + nick + " " + channel + " :\00308No topic is set\r\n")
 // 
-#define RPL_YOUREOPER(user, channel) (":localhost 381 " + user + " " + channel + " :\00303You are now an IRC operator\00303\r\n")
+#define RPL_YOUREOPER(nick, channel) (":" + nick + "!" + nick + "@localhost 381 " + nick + " " + channel + " :\00303You are now an IRC operator\00303\r\n")
+// Communicates the current mode of the channel to the user
+#define RPL_CHANNELMODEIS(nick, channel, mode) (":localhost 324 " + nick + " " + channel + " :" + mode + "\r\n")
 
 
 ///////////////////// ERRORS MESSAGES //////////////////////
@@ -50,3 +52,5 @@
 #define ERR_NICKNAMEINUSE(nick, newNick) (":localhost 433 " + nick + " " + newNick + " :Nickname is already in use\r\n")
 // Error when the nickname is invalid or contains invalid characters
 #define ERR_ERRONEUSNICKNAME(nick, newNick) (":localhost 432 " + nick + " " + newNick + " :Erroneous nickname\r\n")
+//Indicates a missing parameter for a command
+#define ERR_NEEDMOREPARAMS(nick, command) (":localhost 461 " + nick + " " + command + " :Not enough parameters\r\n")

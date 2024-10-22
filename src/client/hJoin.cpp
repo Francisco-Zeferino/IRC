@@ -17,11 +17,13 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
         std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
         
-        if (channel->admins.empty()) {
+        if (channel->admins.size() == 0) {
             channel->addClient(it->second, true);
         } else {
             channel->addClient(it->second);
         }
+
+        it->second->clientChannels.push_back(channel);
 
         channel->sendMsg(message, it->first);
         channel->notifyAllInChannel(channel, message);
@@ -29,8 +31,6 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         std::cout << channelName << " is not a valid channel name\n";
     }
 }
-
-
 
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel* channel) {
     if (channel->hasMode('l') && channel->admins.size() >= channel->userslimit) {
@@ -55,4 +55,19 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
         }
     }
     return false;
+}
+
+void Server::hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string receivedPassword;
+    iss >> receivedPassword;
+
+    if (this->password != receivedPassword) {
+        sendMsgServ(ERR_PASSWDMISMATCH(), it->first);
+        close(it->first);
+        std::cout << "Client disconnected due to incorrect password\n";
+        
+    } else {
+        std::cout << "Client " << it->second->getNick() << " authenticated with correct server password\n";
+    }
+    
 }
