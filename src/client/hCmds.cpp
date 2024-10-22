@@ -42,7 +42,7 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
          channelIt != it->second->clientChannels.end(); ++channelIt) {
         
         Channel* channel = *channelIt;
-        channel->notifyAllInChannel(channel, nickChangeMsg);  // Notify all except the user who changed their username
+        channel->notifyAllInChannel(channel, nickChangeMsg);
     }
 }
 
@@ -95,12 +95,6 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->notifyAllInChannel(channel, message);
 
     channel->removeClient(it->second);
-
-    // std::map<Client *, bool>::iterator mapIterator;
-    // mapIterator = channel->admins.find(it->second);
-    // (*mapIterator).second = false;
-    // mapIterator++;
-    // (*mapIterator).second = true;
 }
 
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -248,7 +242,8 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ++ch) {
         std::string message = ":" + client->getNick() + "!" + client->getUser() + "@localhost QUIT :" + quitMessage + "\r\n";
         (*ch)->notifyAllInChannel(*ch, message);
-        
+    }
+    for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ++ch) {
         (*ch)->removeClient(client);
 
         if ((*ch)->admins.empty() && (*ch)->invUsers.empty()) {
@@ -257,7 +252,8 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     }
 
     sendMsgServ("ERROR :Closing Link: " + client->getNick() + " (" + quitMessage + ")\r\n", it->first);
-    close(it->first);  
+    epoll_ctl(epollfd, EPOLL_CTL_DEL, it->first, NULL);
+    close(it->first);
     clients.erase(it);
     delete client;
 }

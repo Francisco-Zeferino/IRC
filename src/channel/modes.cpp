@@ -35,7 +35,7 @@ void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* 
             aInviteOnlyMode(modeSign == '+');
             break;
         case 'k':
-            aPasswordMode(iss, modeSign == '+');
+            aPasswordMode(iss, modeSign == '+', requester);
             break;
         case 'l':
             aUserLimitMode(iss, modeSign == '+');
@@ -45,7 +45,7 @@ void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* 
             break;
         default:
             sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
-            break; // testar
+            break;
     }
 }
 
@@ -68,6 +68,10 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
     if (targetClient == requester && !addOperator) {
         std::string message = ":localhost 481 " + requester->getNick() + " " + name + " :\00304You cannot remove your own operator status!\00304\r\n";
         sendMsg(message, requester->getSocket());
+        ///cdel
+        std::cout << "Sending to socket: " << requester->getSocket() << std::endl;
+        sendMsg(ERR_NEEDMOREPARAMS(requester->getNick(), "MODE +k"), requester->getSocket());
+
         return;
     }
     if (admins[targetClient] == addOperator) {
@@ -94,30 +98,38 @@ void Channel::aInviteOnlyMode(bool enable) {
     notifyAllInChannel(this, modeChangeMsg);
 }
 
-void Channel::aPasswordMode(std::stringstream &iss, bool enable) {
+void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *requester) {
     if (enable) {
         std::string newPassword;
         iss >> newPassword;
 
         if (newPassword.empty()) {
-            std::cout << "Error: Cannot set an empty password.\n";
+            // Notify the user that the password cannot be empty
+            sendMsg(ERR_NEEDMOREPARAMS(requester->getNick(), "MODE +k"), requester->getSocket());
             return;
         }
         this->password = newPassword;
-        mode = "k";
+        mode += 'k';
 
         std::cout << "Password set for channel " << name << "\n";
-        std::string message = ":localhost MODE " + name + " +k \r\n";
+
+        // Correct message with the password
+        std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " +k " + newPassword + "\r\n";
         notifyAllInChannel(this, message);
     } 
     else {
         this->password.clear();
+        mode.erase(mode.find('k'), 1);
 
         std::cout << "Password removed for channel " << name << "\n";
-        std::string message = ":localhost MODE " + name + " -k \r\n";
+
+        // Correct message without the password
+        std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " -k\r\n";
         notifyAllInChannel(this, message);
     }
 }
+
+
 
 void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
     if (enable) {

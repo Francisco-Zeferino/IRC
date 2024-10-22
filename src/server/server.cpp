@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/16 11:23:34 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/10/22 12:31:41 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void Server::handleQuitOnSignal(){
         hQuitCmd(iss, it);
         it = nextIt;
     }
-    delete it->second;
+    // delete it->second;
     close(connection);
     close(epollfd);
     close(serverSocket);
@@ -161,8 +161,8 @@ void Server::removeChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
     for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
         if ((*it)->name == channelName) {
-            delete *it;
             serverChannels.erase(it);
+            delete *it;
             std::cout << "Channel " << channelName << " removed from server.\n";
             return;
         }

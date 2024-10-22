@@ -18,7 +18,7 @@ class Channel {
 
         std::map<Client *, bool> admins;
         std::vector<std::string> invUsers;
-        std::vector<std::string> bannedUsers; //Nao precisamos
+        // std::vector<std::string> bannedUsers; //Nao precisamos
 
         // Chanel management
         void setTopic(const std::string &newTopic, Client* requester);
@@ -33,7 +33,7 @@ class Channel {
         bool isAdmin(Client *client);
         void aOperatorMode(std::stringstream &iss, bool addOperator, Client *requester);
         void aInviteOnlyMode(bool enable);
-        void aPasswordMode(std::stringstream &iss, bool enable);
+        void aPasswordMode(std::stringstream &iss, bool enable, Client* requester);
         void aUserLimitMode(std::stringstream &iss, bool enable);
         void aTopicMode(bool enable);
 

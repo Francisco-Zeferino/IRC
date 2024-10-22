@@ -44,7 +44,7 @@ void Channel::addClient(Client *client, bool isOperator) {
     admins.insert(std::make_pair(client, isOperator));
 }
 
-void Channel::removeClient(Client* client) { //updated
+void Channel::removeClient(Client* client) {
     admins.erase(client);
 
     std::vector<std::string>::iterator invIt = std::find(invUsers.begin(), invUsers.end(), client->getNick());
@@ -52,10 +52,10 @@ void Channel::removeClient(Client* client) { //updated
         invUsers.erase(invIt);
     }
 
-    std::vector<std::string>::iterator banIt = std::find(bannedUsers.begin(), bannedUsers.end(), client->getNick());
-    if (banIt != bannedUsers.end()) {
-        bannedUsers.erase(banIt);
-    }
+    // std::vector<std::string>::iterator banIt = std::find(bannedUsers.begin(), bannedUsers.end(), client->getNick());
+    // if (banIt != bannedUsers.end()) {
+    //     bannedUsers.erase(banIt);
+    // }
 }
 
 bool Channel::isAdmin(Client* client) {
