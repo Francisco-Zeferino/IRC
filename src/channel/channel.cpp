@@ -80,7 +80,10 @@ bool Channel::validateUserJoin(const std::string user) {
 }
 
 void Channel::sendMsg(const std::string &msg, int clientSocket) {
-    send(clientSocket, msg.c_str(), msg.length(), 0);
+    size_t i = send(clientSocket, msg.c_str(), msg.length(), 0);
+    if (i != msg.size()) {
+        std::cerr << "Error sending message to client" << std::endl;
+    }
 }
 
 void Channel::notifyAllInChannel(Channel *channel, std::string message){

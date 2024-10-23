@@ -35,7 +35,8 @@ void Server::handleQuitOnSignal(){
         hQuitCmd(iss, it);
         it = nextIt;
     }
-    // delete it->second;
+    close(it->first);
+    delete it->second;
     close(connection);
     close(epollfd);
     close(serverSocket);
@@ -160,7 +161,7 @@ void Server::removeChannel(const std::string& channelName) {
     for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
         if ((*it)->name == channelName) {
             serverChannels.erase(it);
-            delete *it;
+            //delete *it;
             std::cout << "Channel " << channelName << " removed from server.\n";
             return;
         }

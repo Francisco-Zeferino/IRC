@@ -34,4 +34,7 @@ run:
 trace_epoll:
 	make re && strace -e epoll_ctl,epoll_wait ./ircserv 8080 124
 
+fsanitize:
+	make re && ./ircserv 8080 123
+
 .PHONY: all clean fclean re

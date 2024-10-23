@@ -19,15 +19,10 @@ std::vector<std::string> splitCommands(const std::string &message) {
 
 std::string getClientMessage(int clientSocket, int &bytesRead) {
     char buffer[BUFFER_SIZE] = {0};
-    bool stopLoop = false;
     std::string tmp;
-    while(!stopLoop){
-        memset(buffer, 0, sizeof(buffer));
-        bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-        tmp.append(std::string(buffer));
-        if(tmp.find('\n') != std::string::npos)
-            stopLoop = true;
-    }
+    memset(buffer, 0, sizeof(buffer));
+    bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    tmp = std::string(buffer);
     return tmp;
 }
 
