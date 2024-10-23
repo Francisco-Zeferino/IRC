@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/22 12:31:41 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/22 16:22:55 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,20 +135,25 @@ Client* Server::getClient(const std::string user){
     return NULL;
 }
 
-Channel* Server::findOrCreateChannel(const std::string& channelName) {
-    std::vector<Channel*>::iterator it;
-    for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
+Channel* Server::findChannel(const std::string& channelName) {
+    for (std::vector<Channel*>::iterator it = serverChannels.begin(); it != serverChannels.end(); ++it) {
         if ((*it)->name == channelName) {
             return *it;
         }
     }
+    
+    return NULL;
+}
 
-    std::cout << "Channel not found, creating new channel: " << channelName << "\n";
+Channel* Server::createChannel(const std::string& channelName) {
+    std::cout << "Creating new channel: " << channelName << "\n";
     Channel* newChannel = new Channel(channelName);
-    if(newChannel == NULL) {
-        std::cout << "Error creating channel\n";
+    
+    if (newChannel == NULL) {
+        std::cerr << "Error creating channel\n";
         return NULL;
     }
+    
     newChannel->setMode("+t");
     newChannel->setMode("+o");
     serverChannels.push_back(newChannel);
@@ -161,7 +166,7 @@ void Server::removeChannel(const std::string& channelName) {
     for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
         if ((*it)->name == channelName) {
             serverChannels.erase(it);
-            //delete *it;
+            // delete *it;
             std::cout << "Channel " << channelName << " removed from server.\n";
             return;
         }
@@ -187,3 +192,23 @@ void Server::sendMsgServ(const std::string &msg, int clientSocket) const {
     send(clientSocket, msg.c_str(), msg.length(), 0);
 }
 
+// Channel* Server::findOrCreateChannel(const std::string& channelName) {
+//     std::vector<Channel*>::iterator it;
+//     for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
+//         if ((*it)->name == channelName) {
+//             return *it;
+//         }
+//     }
+
+//     std::cout << "Channel not found, creating new channel: " << channelName << "\n";
+//     Channel* newChannel = new Channel(channelName);
+//     if(newChannel == NULL) {
+//         std::cout << "Error creating channel\n";
+//         return NULL;
+//     }
+//     newChannel->setMode("+t");
+//     newChannel->setMode("+o");
+//     serverChannels.push_back(newChannel);
+//     std::cout << "Channel created: " << channelName << " with default modes: +t +o\n";
+//     return newChannel;
+// }

@@ -65,16 +65,15 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hKickCmd(iss, it);
     } else if (command == "INVITE") {   //finish
         hInviteCmd(iss, it);
-    } else if (command == "TOPIC") {    //finish
+    } else if (command == "TOPIC") {    //finish corrigir -t do op
         hTopicCmd(iss, it);
     } else if (command == "MODE") {     //finish
         hModeCmd(iss, it);
     } else if (command == "WHO") {      //
         hWhoCmd(iss, it);
-    } else if (command == "PASS") {     //corrigir msgs
+    } else if (command == "PASS") {     //finish
         hPassCmd(iss, it);
-    } else if (command == "QUIT") {     //pseudo finish
-        std::cout << "QUIT" << std::endl;
+    } else if (command == "QUIT") {     //finish finalisar ctrl c
         hQuitCmd(iss, it);
         return ;
     }else

@@ -57,7 +57,11 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    std::string channelName;
    iss >> channelName;
    std::map<Client *, bool>::iterator clientIt;
-   Channel *channel= findOrCreateChannel(channelName);
+   Channel *channel= findChannel(channelName); //alt
+   if (!channel) {
+        std::cout << "Channel not found: " << channelName << "\n";
+        return;
+    }
     for(clientIt = channel->admins.begin(); clientIt != channel->admins.end(); clientIt++){
         if(it->second->getNick() != clientIt->first->getNick())
             channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + clientIt->first->getNick() + "\r\n", it->first);
@@ -71,7 +75,7 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, reason;
     iss >> channelName;
 
-    Channel* channel = findOrCreateChannel(channelName);
+    Channel* channel = findChannel(channelName); //alt
     if (!channel) {
         channel->sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
         return;
@@ -104,7 +108,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
     bool isChannel = (target[0] == '#'); 
     
     if (isChannel) {
-        Channel* channel = findOrCreateChannel(target);
+        Channel* channel = findChannel(target); //alt
         if (!channel) {
             std::cout << "Channel not found: " << target << "\n";
             return;
@@ -129,7 +133,7 @@ void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, targetNick, reason;
     iss >> channelName >> targetNick;
 
-    Channel* channel = findOrCreateChannel(channelName);
+    Channel* channel = findChannel(channelName); //alt
     if (!channel) {
         channel->sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
         return;
@@ -168,7 +172,7 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     std::string targetNick, targetChannel;
     iss >> targetNick >> targetChannel;
 
-    Channel* channel = findOrCreateChannel(targetChannel);
+    Channel* channel = findChannel(targetChannel); //alt
 
     if (!channel->isAdmin(it->second)) {
         channel->sendMsg(ERR_CHANOPRIVSNEEDED(it->second->getNick(), targetChannel), it->first);
@@ -205,7 +209,7 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
     std::string channelName, newTopic;
     iss >> channelName;
 
-    Channel* channel = findOrCreateChannel(channelName);
+    Channel* channel = findChannel(channelName); //alt
     if (!channel) {
         channel->sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
         return;

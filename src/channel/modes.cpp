@@ -7,7 +7,11 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> channelName >> mode;
 
 
-    Channel* channel = findOrCreateChannel(channelName);
+    Channel* channel = findChannel(channelName); //alt
+    if (!channel) {
+        std::cout << "Channel not found: " << channelName << "\n";
+        return;
+    }
 
     if(mode.empty()){
         channel->sendMsg(ERR_UNKNOWNMODE(it->second->getNick(), mode), it->first);
@@ -68,10 +72,6 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
     if (targetClient == requester && !addOperator) {
         std::string message = ":localhost 481 " + requester->getNick() + " " + name + " :\00304You cannot remove your own operator status!\00304\r\n";
         sendMsg(message, requester->getSocket());
-        ///cdel
-        std::cout << "Sending to socket: " << requester->getSocket() << std::endl;
-        sendMsg(ERR_NEEDMOREPARAMS(requester->getNick(), "MODE +k"), requester->getSocket());
-
         return;
     }
     if (admins[targetClient] == addOperator) {
@@ -104,16 +104,14 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *request
         iss >> newPassword;
 
         if (newPassword.empty()) {
-            // Notify the user that the password cannot be empty
-            sendMsg(ERR_NEEDMOREPARAMS(requester->getNick(), "MODE +k"), requester->getSocket());
+            std::string errorMsg = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " +k :No password was provided.\r\n";
+            notifyAllInChannel(this, errorMsg);
             return;
         }
         this->password = newPassword;
         mode += 'k';
 
         std::cout << "Password set for channel " << name << "\n";
-
-        // Correct message with the password
         std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " +k " + newPassword + "\r\n";
         notifyAllInChannel(this, message);
     } 
@@ -122,8 +120,6 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *request
         mode.erase(mode.find('k'), 1);
 
         std::cout << "Password removed for channel " << name << "\n";
-
-        // Correct message without the password
         std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " -k\r\n";
         notifyAllInChannel(this, message);
     }
