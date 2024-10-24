@@ -243,15 +243,15 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     }
 
     Client* client = it->second;
-    std::cout << "QUIT 2\n";
+    std::cout << it->second->getChannel() << std::endl;
     for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ch++) {
-        std::string message = ":" + client->getNick() + "!" + client->getUser() + "@ " + (*ch)->name  + " QUIT :" + quitMessage + "\r\n";
+        std::string message = RPL_PART(user_info(client->getNick(), client->getUser()), (*ch)->name);
         (*ch)->notifyAllInChannel(*ch, message);
     }
     for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ++ch) {
         (*ch)->removeClient(client);
         if ((*ch)->admins.empty() && (*ch)->invUsers.empty()) {
-            removeChannel((*ch)->name);
+            //removeChannel((*ch)->name);
         }
     }
 

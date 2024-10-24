@@ -7,7 +7,6 @@ SRCS = $(shell find src -name '*.cpp')
 OBJS_DIR = objs
 OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o,$(notdir $(SRCS)))
 
-
 all : $(NAME)
 
 $(NAME) : $(OBJS)

@@ -35,8 +35,8 @@ void Server::handleQuitOnSignal(){
         hQuitCmd(iss, it);
         it = nextIt;
     }
-    close(it->first);
-    delete it->second;
+    //close(it->first);
+    //delete it->second;
     close(connection);
     close(epollfd);
     close(serverSocket);

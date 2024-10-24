@@ -32,9 +32,8 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     } else {
         channel->addClient(it->second);
     }
-
     it->second->clientChannels.push_back(channel);
-
+    std::cout << it->second->clientChannels.size() << std::endl;
     sendMsgServ(message, it->first);
     channel->notifyAllInChannel(channel, message);
     
