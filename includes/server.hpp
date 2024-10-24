@@ -55,6 +55,7 @@ class Server
         void listenSocket();
         void setConnection(int epollfd);
         static void handleSignal(int signal);
+        void closeConnections();
         void handleQuitOnSignal();
         
         //Epoll state management

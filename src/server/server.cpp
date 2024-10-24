@@ -21,6 +21,12 @@ Server::~Server() {
     handleQuitOnSignal();
 }
 
+void Server::closeConnections(){
+    close(connection);
+    close(epollfd);
+    close(serverSocket);
+}
+
 void Server::handleQuitOnSignal(){
     std::map<int, Client*>::iterator it;
     std::map<int, Client*>::iterator nextIt;
@@ -35,11 +41,9 @@ void Server::handleQuitOnSignal(){
         hQuitCmd(iss, it);
         it = nextIt;
     }
-    //close(it->first);
-    //delete it->second;
-    close(connection);
-    close(epollfd);
-    close(serverSocket);
+    if(it != clients.end())
+        hQuitCmd(iss, it);
+    closeConnections();
     for(itChannel = serverChannels.begin(); itChannel != serverChannels.end(); itChannel++){
         delete *itChannel;
     }
