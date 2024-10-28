@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/22 15:32:30 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/28 16:48:34 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,21 @@
 #include <vector>
 #include <sys/epoll.h>
 #include <errno.h>
+
 #include "numeric_responses.hpp"
+// #include "client.hpp"
+// #include "channel.hpp"
+// #include "bot.hpp"
+
+
+#include <ctime>
+#include <iomanip>
+
+
 
 class Client;
 class Channel;
+class Bot;
 
 class Server
 {
@@ -45,9 +56,7 @@ class Server
         int epollfd;
         int nfds;
         epoll_event event;
-        std::map<int, Client* > clients;            //Clients connected to server
-        std::vector<Channel* > serverChannels;      //Channels on sever
-
+        
         //Socket Management
         void setEpoll();
         void createSocket();
@@ -56,6 +65,10 @@ class Server
         void setConnection(int epollfd);
         static void handleSignal(int signal);
         void handleQuitOnSignal();
+
+        //bot funct
+        int createBotSocket();
+        Bot *startBot(Channel *channel);
         
         //Epoll state management
         void epollState(int epollfd, int socket, uint32_t newEvent);
@@ -80,7 +93,11 @@ class Server
         void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;
-        
+    
+    protected:
+        std::map<int, Client* > clients;            //Clients connected to server
+        std::vector<Channel* > serverChannels;      //Channels on sever
+
     public:
         Server();
         ~Server();
@@ -89,10 +106,8 @@ class Server
         
         Channel* findChannel(const std::string& channelName);
         Channel* createChannel(const std::string& channelName);
-        // Channel* findOrCreateChannel(const std::string& channelName);
         void removeChannel(const std::string& channelName);
-        
-        
+         
 };
 
 #endif

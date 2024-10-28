@@ -2,8 +2,10 @@
 #define CHANNEL_HPP
 
 #include "client.hpp"
+#include "bot.hpp"
 
 class Client;
+class Bot;
 
 class Channel {
     public :
@@ -18,7 +20,7 @@ class Channel {
 
         std::map<Client *, bool> admins;
         std::vector<std::string> invUsers;
-        // std::vector<std::string> bannedUsers; //Nao precisamos
+        Bot *bot;
 
         // Chanel management
         void setTopic(const std::string &newTopic, Client* requester);

@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/22 16:22:55 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/28 16:04:50 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,9 @@ void Server::setEpoll() {
         std::cout << "Failed to add file descriptor to epoll" << std::endl;
         return ;
     }
+    
     struct epoll_event clientEvent[1024];
+    
     while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
         if(nfds == -1){

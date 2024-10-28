@@ -32,12 +32,21 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     } else {
         channel->addClient(it->second);
     }
-
     it->second->clientChannels.push_back(channel);
 
-    sendMsgServ(message, it->first);
-    channel->notifyAllInChannel(channel, message);
-    
+    //BOT
+    if (channel->bot == NULL) {
+        std::cout << "BoT START\n"; 
+        channel->bot = startBot(channel);
+        
+        if (channel->bot) {
+            channel->addClient(channel->bot);
+            std::string botJoinMessage = ":" + channel->bot->getNick() + "!" + channel->bot->getUser() + "@localhost JOIN " + channelName + "\r\n";
+            channel->notifyAllInChannel(channel, botJoinMessage);
+        } else {
+            std::cerr << "Failed to start bot for channel: " << channelName << "\n";
+        }
+    }
 }
 
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel* channel) {

@@ -51,11 +51,6 @@ void Channel::removeClient(Client* client) {
     if (invIt != invUsers.end()) {
         invUsers.erase(invIt);
     }
-
-    // std::vector<std::string>::iterator banIt = std::find(bannedUsers.begin(), bannedUsers.end(), client->getNick());
-    // if (banIt != bannedUsers.end()) {
-    //     bannedUsers.erase(banIt);
-    // }
 }
 
 bool Channel::isAdmin(Client* client) {

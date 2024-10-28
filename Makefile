@@ -1,6 +1,6 @@
 NAME = ircserv
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I ./includes
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g -I ./includes
 
 SRCS = $(shell find src -name '*.cpp')
 
@@ -33,5 +33,8 @@ run:
 	
 trace_epoll:
 	make re && strace -e epoll_ctl,epoll_wait ./ircserv 8080 124
+
+fsanitize:
+	make re && ./ircserv 8080 123
 
 .PHONY: all clean fclean re
