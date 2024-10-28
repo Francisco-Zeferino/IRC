@@ -2,6 +2,7 @@
 #define CHANNEL_HPP
 
 #include "client.hpp"
+#include "bot.hpp"
 
 class Client;
 
@@ -17,6 +18,7 @@ class Channel {
         
 
         std::map<Client *, bool> admins;
+        std::vector<Bot *> bots;
         std::vector<std::string> invUsers;
         // std::vector<std::string> bannedUsers; //Nao precisamos
 

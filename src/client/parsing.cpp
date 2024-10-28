@@ -76,7 +76,10 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
     } else if (command == "QUIT") {     //finish finalisar ctrl c
         hQuitCmd(iss, it);
         return ;
-    }else
+    }else if(command == "ROVER"){
+        hRoverCommands(iss, it);
+    }else{
         return;
+    }
     epollState(epollfd, it->first, EPOLLIN);
 }

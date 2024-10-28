@@ -57,6 +57,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    std::string channelName;
    iss >> channelName;
    std::map<Client *, bool>::iterator clientIt;
+   std::vector<Bot *>::iterator botIt;
    Channel *channel= findChannel(channelName); //alt
    if (!channel) {
         std::cout << "Channel not found: " << channelName << "\n";
@@ -68,7 +69,10 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
         else
             channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + it->second->getNick() + "\r\n", it->first);
     }
-   channel->sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
+    for(botIt = channel->bots.begin(); botIt != channel->bots.end(); botIt++){
+        channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + (*botIt)->getNick() + "\r\n", it->first);
+    }
+    channel->sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -260,4 +264,20 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     close(it->first);
     clients.erase(it);
     delete client;
+}
+
+void Server::hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string command, channel;
+    iss >> command >> channel;
+    Channel* ch = findChannel(channel);
+    if (!ch) {
+        sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channel), it->first);
+        return;
+    }
+    if(command == "join"){
+        Bot *bot = createBot();
+        ch->bots.push_back(bot);
+        std::string message = ":" + bot->getNick() + "!" + bot->getUser() + "@localhost JOIN " + ch->name + "\r\n";
+        ch->notifyAllInChannel(ch, message);
+    }
 }
