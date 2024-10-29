@@ -64,12 +64,17 @@ class Server
         void listenSocket();
         void setConnection(int epollfd);
         static void handleSignal(int signal);
+        void closeConnections();
         void handleQuitOnSignal();
 
         //bot funct
         int createBotSocket();
         Bot *startBot(Channel *channel);
         
+        //Bot
+        int setBot();
+        Bot *createBot();
+
         //Epoll state management
         void epollState(int epollfd, int socket, uint32_t newEvent);
 
@@ -92,6 +97,7 @@ class Server
         void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;
     
     protected:

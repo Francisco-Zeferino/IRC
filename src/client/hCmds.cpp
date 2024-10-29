@@ -57,6 +57,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    std::string channelName;
    iss >> channelName;
    std::map<Client *, bool>::iterator clientIt;
+   std::vector<Bot *>::iterator botIt;
    Channel *channel= findChannel(channelName); //alt
    if (!channel) {
         std::cout << "Channel not found: " << channelName << "\n";
@@ -68,7 +69,10 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
         else
             channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + it->second->getNick() + "\r\n", it->first);
     }
-   channel->sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
+    for(botIt = channel->bots.begin(); botIt != channel->bots.end(); botIt++){
+        channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + (*botIt)->getNick() + "\r\n", it->first);
+    }
+    channel->sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }
 
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -115,7 +119,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         }
         for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
             if (it->second != channelMap->first) {
-                channel->sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", channelMap->first->getSocket());
+                channel->sendMsg(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), channelMap->first->getSocket());
             }
         }
         std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
@@ -123,7 +127,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         std::map<int, Client*>::iterator clientIt = clients.begin();
         while(clientIt != clients.end()){
             if(target == clientIt->second->getNick())
-                sendMsgServ(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
+                sendMsgServ(RPL_PRIVMSG(user_info(clientIt->second->getNick(), clientIt->second->getUser()), target, message), clientIt->first);
             clientIt++;
         }
     }
@@ -237,21 +241,21 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
 void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string quitMessage;
     std::getline(iss, quitMessage);
+    std::cout << "QUIT 1\n";
     if (quitMessage.empty()) {
         quitMessage = "Client Quit";
     }
 
     Client* client = it->second;
-
-    for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ++ch) {
-        std::string message = ":" + client->getNick() + "!" + client->getUser() + "@localhost QUIT :" + quitMessage + "\r\n";
+    std::cout << it->second->getChannel() << std::endl;
+    for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ch++) {
+        std::string message = RPL_PART(user_info(client->getNick(), client->getUser()), (*ch)->name);
         (*ch)->notifyAllInChannel(*ch, message);
     }
     for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ++ch) {
         (*ch)->removeClient(client);
-
         if ((*ch)->admins.empty() && (*ch)->invUsers.empty()) {
-            removeChannel((*ch)->name);
+            //removeChannel((*ch)->name);
         }
     }
 
@@ -260,4 +264,37 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     close(it->first);
     clients.erase(it);
     delete client;
+}
+
+void Server::hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string command, channel;
+    iss >> command >> channel;
+    Channel* ch = findChannel(channel);
+    if(command == "join"){
+        if (!ch) {
+            sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channel), it->first);
+            return;
+        }
+        std::map<Client *, bool>::iterator user = ch->admins.find(it->second);
+        if(user->second == false){
+            sendMsgServ(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channel), it->first);
+            return;
+        }
+        Bot *bot = createBot();
+        ch->bots.push_back(bot);
+        std::string message = ":+" + bot->getNick() + "!" + bot->getUser() + "@localhost JOIN " + ch->name + "\r\n";
+        ch->notifyAllInChannel(ch, message);
+    }
+    else if(command == "help"){
+        std::string message = " :Commands available: join, help, leave, list\r\n";
+        sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), channel, message), it->first);
+    }
+    else if(command == "leave"){
+        std::vector<Bot *>::iterator botIt;
+        for(botIt = ch->bots.begin(); botIt != ch->bots.end(); botIt++){
+            ch->notifyAllInChannel(ch ,RPL_PART(user_info((*botIt)->getNick(), (*botIt)->getUser()), ch->name));
+            ch->bots.erase(botIt);
+            break;
+        }
+    }
 }

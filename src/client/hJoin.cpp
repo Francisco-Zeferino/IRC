@@ -33,20 +33,9 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         channel->addClient(it->second);
     }
     it->second->clientChannels.push_back(channel);
-
-    //BOT
-    if (channel->bot == NULL) {
-        std::cout << "BoT START\n"; 
-        channel->bot = startBot(channel);
-        
-        if (channel->bot) {
-            channel->addClient(channel->bot);
-            std::string botJoinMessage = ":" + channel->bot->getNick() + "!" + channel->bot->getUser() + "@localhost JOIN " + channelName + "\r\n";
-            channel->notifyAllInChannel(channel, botJoinMessage);
-        } else {
-            std::cerr << "Failed to start bot for channel: " << channelName << "\n";
-        }
-    }
+    sendMsgServ(message, it->first);
+    channel->notifyAllInChannel(channel, message);
+    
 }
 
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel* channel) {
@@ -77,12 +66,7 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
 void Server::hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string receivedPassword;
     iss >> receivedPassword;
-
-    if (this->password != receivedPassword) {
-        sendMsgServ(ERR_PASSWDMISMATCH(), it->first);
-        close(it->first);
-        std::cout << "Client disconnected due to incorrect password\n";
-        
+el->bot == NU
     } else {
         std::cout << "Client " << it->second->getNick() << " authenticated with correct server password\n";
     }

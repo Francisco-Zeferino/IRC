@@ -10,12 +10,12 @@
 // class Channel;
 // class Client;
 
-class Bot : public Client {
-    public:
-        Bot(int socket);
-        void banana();
+// class Bot : public Client {
+//     public:
+//         Bot(int socket);
+//         void banana();
 
-    private:
+//     private:
     // void valitadeBotMsg(const std::string &message);
 
     // void greetBotMsg(Channel *channel);
@@ -25,10 +25,9 @@ class Bot : public Client {
         // int botSocket;
         // std::string _botnick;
         // std::string _botuser;
-};
+// };
 
 
-#endif 
 
 
 
@@ -42,3 +41,19 @@ class Bot : public Client {
 //         void timeBotMsg(Channel *channel);
 //         void sendBotMsg(Channel *channel, const std::string &message);
 // };
+#include "iostream"
+
+class Bot {
+    public:
+        Bot();
+        Bot(std::string nick, std::string user, int socket);
+        std::string getUser() const;
+        std::string getNick() const;
+        int getSocket() const;
+    private:
+        std::string channel;
+        std::string nick;
+        std::string user;
+        int socket;
+};
+#endif 

@@ -19,6 +19,7 @@ class Channel {
         
 
         std::map<Client *, bool> admins;
+        std::vector<Bot *> bots;
         std::vector<std::string> invUsers;
         Bot *bot;
 

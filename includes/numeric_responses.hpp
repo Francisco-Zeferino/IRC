@@ -20,6 +20,7 @@
 // Communicates the current mode of the channel to the user
 #define RPL_CHANNELMODEIS(nick, channel, mode) (":localhost 324 " + nick + " " + channel + " :" + mode + "\r\n")
 
+#define RPL_PART(user_info, channel) (user_info + "@localhost PART " + channel + "\r\n")
 
 ///////////////////// ERRORS MESSAGES //////////////////////
 // 
