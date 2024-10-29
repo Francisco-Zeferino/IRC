@@ -119,7 +119,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         }
         for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
             if (it->second != channelMap->first) {
-                channel->sendMsg(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", channelMap->first->getSocket());
+                channel->sendMsg(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), channelMap->first->getSocket());
             }
         }
         std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
@@ -127,7 +127,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         std::map<int, Client*>::iterator clientIt = clients.begin();
         while(clientIt != clients.end()){
             if(target == clientIt->second->getNick())
-                sendMsgServ(":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost PRIVMSG " + target + message + "\r\n", clientIt->first);
+                sendMsgServ(RPL_PRIVMSG(user_info(clientIt->second->getNick(), clientIt->second->getUser()), target, message), clientIt->first);
             clientIt++;
         }
     }
@@ -270,14 +270,31 @@ void Server::hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iter
     std::string command, channel;
     iss >> command >> channel;
     Channel* ch = findChannel(channel);
-    if (!ch) {
-        sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channel), it->first);
-        return;
-    }
     if(command == "join"){
+        if (!ch) {
+            sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channel), it->first);
+            return;
+        }
+        std::map<Client *, bool>::iterator user = ch->admins.find(it->second);
+        if(user->second == false){
+            sendMsgServ(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channel), it->first);
+            return;
+        }
         Bot *bot = createBot();
         ch->bots.push_back(bot);
-        std::string message = ":" + bot->getNick() + "!" + bot->getUser() + "@localhost JOIN " + ch->name + "\r\n";
+        std::string message = ":+" + bot->getNick() + "!" + bot->getUser() + "@localhost JOIN " + ch->name + "\r\n";
         ch->notifyAllInChannel(ch, message);
+    }
+    else if(command == "help"){
+        std::string message = " :Commands available: join, help, leave, list\r\n";
+        sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), channel, message), it->first);
+    }
+    else if(command == "leave"){
+        std::vector<Bot *>::iterator botIt;
+        for(botIt = ch->bots.begin(); botIt != ch->bots.end(); botIt++){
+            ch->notifyAllInChannel(ch ,RPL_PART(user_info((*botIt)->getNick(), (*botIt)->getUser()), ch->name));
+            ch->bots.erase(botIt);
+            break;
+        }
     }
 }
