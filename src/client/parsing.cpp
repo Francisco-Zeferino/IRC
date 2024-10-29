@@ -22,9 +22,6 @@ std::string getClientMessage(int clientSocket, int &bytesRead) {
     std::string tmp;
     memset(buffer, 0, sizeof(buffer));
     bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    tmp = std::string(buffer);
-    memset(buffer, 0, sizeof(buffer));
-    bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     tmp.append(std::string(buffer));
     return tmp;
 }
@@ -79,10 +76,17 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
     } else if (command == "QUIT") {     //finish finalisar ctrl c
         hQuitCmd(iss, it);
         return ;
-    }else if(command == "ROVER"){
-        hRoverCommands(iss, it);
-    }else{
+    } else if(command == "BOT") {      //alterar cmds e names
+        hBotCmd(iss, it);
+    } else {
         return;
     }
     epollState(epollfd, it->first, EPOLLIN);
 }
+
+// Bot join #a 
+// Bot leave #a
+// Bot Ola
+// Bot time
+// Bot send ./bla/fdx.txt manuel
+// Bot gg

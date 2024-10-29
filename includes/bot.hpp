@@ -2,6 +2,29 @@
 #define BOT_HPP
 
 #include "client.hpp"
+
+class Bot {
+    public:
+        Bot();
+        Bot(std::string nick, std::string user, int socket);
+
+        std::string getUser() const;
+        std::string getNick() const;
+        int getSocket() const;
+
+        // std::string hBotCmd(const std::string& cmd);
+        
+
+    private:
+        std::string channel; // it is needed?
+        std::string nick;
+        std::string user;
+        int socket;
+};
+
+#endif
+
+
 // #include "server.hpp"
 // #include "channel.hpp"
 // #include "irc.hpp"
@@ -41,19 +64,3 @@
 //         void timeBotMsg(Channel *channel);
 //         void sendBotMsg(Channel *channel, const std::string &message);
 // };
-#include "iostream"
-
-class Bot {
-    public:
-        Bot();
-        Bot(std::string nick, std::string user, int socket);
-        std::string getUser() const;
-        std::string getNick() const;
-        int getSocket() const;
-    private:
-        std::string channel;
-        std::string nick;
-        std::string user;
-        int socket;
-};
-#endif 

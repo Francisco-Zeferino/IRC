@@ -1,12 +1,14 @@
 //////////////////// REPLY MESSAGES ///////////////
-#define user_info(nick, user) (":" + nick + "!" + user + "@localhost")
+// #define user_info(nick, user) (":" + nick + "!" + user + "@localhost")
+#define user_info(nick, user) (std::string(":") + (nick) + "!" + (user) + "@localhost")
 //
 #define RPL_WELCOME(user_info, nick)(user_info + " 001 " + nick + " :\00303Welcome to the localhost Network\00303, " + nick + "\r\n")
 //
 #define RPL_INVITING(user_info, target, channel) (user_info + " INVITING " + target + " " + channel + "\r\n")
 //
 #define RPL_INVITE(user_info, target, channel) (user_info + " INVITE " + target + " " + channel + "\r\n")
-#define RPL_PRIVMSG(user_info, target, message) (user_info + " PRIVMSG " + target + message + "\r\n")
+//
+#define RPL_PRIVMSG(user_info, target, message) (user_info + " PRIVMSG " + target + " :" + message + "\r\n")
 // Successful operator promotion
 #define RPL_OPGIVEN(nick, target, channel) (":localhost 324 " + nick + " " + target + " " + channel + " :\00303" + target + " is now a channel operator\00303\r\n")
 // Successful operator demotion

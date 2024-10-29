@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/28 16:48:34 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/29 15:33:14 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,6 @@
 #include <errno.h>
 
 #include "numeric_responses.hpp"
-// #include "client.hpp"
-// #include "channel.hpp"
-// #include "bot.hpp"
-
 
 #include <ctime>
 #include <iomanip>
@@ -66,15 +62,16 @@ class Server
         static void handleSignal(int signal);
         void closeConnections();
         void handleQuitOnSignal();
-
-        //bot funct
-        int createBotSocket();
-        Bot *startBot(Channel *channel);
         
         //Bot
         int setBot();
         Bot *createBot();
-
+        void aBotJoin(std::map<int, Client*>::iterator it, const std::string &channelName);
+        void aBotHelp(std::map<int, Client*>::iterator it, const std::string &channelName);
+        void aBotLeave(std::map<int, Client*>::iterator it, const std::string &channelName);
+        void aBotHello(std::map<int, Client*>::iterator it, const std::string &channelName);
+        void aBotTime(std::map<int, Client*>::iterator it, const std::string &channelName);
+        
         //Epoll state management
         void epollState(int epollfd, int socket, uint32_t newEvent);
 
@@ -97,7 +94,7 @@ class Server
         void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
-        void hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;
     
     protected:
