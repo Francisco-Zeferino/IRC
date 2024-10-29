@@ -58,7 +58,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    iss >> channelName;
    std::map<Client *, bool>::iterator clientIt;
    std::vector<Bot *>::iterator botIt;
-   Channel *channel= findChannel(channelName); //alt
+   Channel *channel= findChannel(channelName);
    if (!channel) {
         std::cout << "Channel not found: " << channelName << "\n";
         return;
@@ -247,7 +247,6 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     }
 
     Client* client = it->second;
-    std::cout << it->second->getChannel() << std::endl;
     for (std::vector<Channel*>::iterator ch = client->clientChannels.begin(); ch != client->clientChannels.end(); ch++) {
         std::string message = RPL_PART(user_info(client->getNick(), client->getUser()), (*ch)->name);
         (*ch)->notifyAllInChannel(*ch, message);

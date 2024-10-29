@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/28 16:04:50 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/10/29 12:32:49 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,24 +197,3 @@ void Server::setConnection(int epollfd){
 void Server::sendMsgServ(const std::string &msg, int clientSocket) const {
     send(clientSocket, msg.c_str(), msg.length(), 0);
 }
-
-// Channel* Server::findOrCreateChannel(const std::string& channelName) {
-//     std::vector<Channel*>::iterator it;
-//     for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
-//         if ((*it)->name == channelName) {
-//             return *it;
-//         }
-//     }
-
-//     std::cout << "Channel not found, creating new channel: " << channelName << "\n";
-//     Channel* newChannel = new Channel(channelName);
-//     if(newChannel == NULL) {
-//         std::cout << "Error creating channel\n";
-//         return NULL;
-//     }
-//     newChannel->setMode("+t");
-//     newChannel->setMode("+o");
-//     serverChannels.push_back(newChannel);
-//     std::cout << "Channel created: " << channelName << " with default modes: +t +o\n";
-//     return newChannel;
-// }
