@@ -15,7 +15,7 @@ class Client
         Client(int socket);
 
         std::vector<Channel *> clientChannels;
-
+        std::map<Client *, std::string> filePool;
         // Getters
         int getSocket() const;
         std::string getNick() const;

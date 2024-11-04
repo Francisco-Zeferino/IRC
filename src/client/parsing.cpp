@@ -57,7 +57,11 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hUserCmd(iss, it);
     } else if (command == "JOIN") {     //finish
         hJoinCmd(iss, it);
-    } else if (command == "PART") {     //finish
+    }else if(command == "SF") {
+        hSFCmd(iss, it);
+    }else if(command == "SFA") {
+        hSFACmd(iss, it);
+    }else if (command == "PART") {     //finish
         hPartCmd(iss, it);
     } else if (command == "PRIVMSG") {  //finish
         hPrivMsgCmd(iss, it);
@@ -67,6 +71,8 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
         hInviteCmd(iss, it);
     } else if (command == "TOPIC") {    //finish corrigir -t do op
         hTopicCmd(iss, it);
+    }else if(command == "NOTICE"){
+        hNoticeCmd(iss, it);
     } else if (command == "MODE") {     //finish
         hModeCmd(iss, it);
     } else if (command == "WHO") {      //

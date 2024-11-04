@@ -7,6 +7,7 @@
 //
 #define RPL_INVITE(user_info, target, channel) (user_info + " INVITE " + target + " " + channel + "\r\n")
 #define RPL_PRIVMSG(user_info, target, message) (user_info + " PRIVMSG " + target + message + "\r\n")
+#define RPL_NOTICE(user_info, target, message) (user_info + " NOTICE " + target + message + "\r\n")
 // Successful operator promotion
 #define RPL_OPGIVEN(nick, target, channel) (":localhost 324 " + nick + " " + target + " " + channel + " :\00303" + target + " is now a channel operator\00303\r\n")
 // Successful operator demotion
