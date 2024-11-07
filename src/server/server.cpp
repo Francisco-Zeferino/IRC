@@ -22,7 +22,6 @@ Server::~Server() {
 }
 
 void Server::closeConnections(){
-    close(connection);
     close(epollfd);
     close(serverSocket);
 }
@@ -32,17 +31,13 @@ void Server::handleQuitOnSignal(){
     std::map<int, Client*>::iterator nextIt;
     std::vector<Channel*>::iterator itChannel;
     std::stringstream iss;
+    int i = 1;
     
     for(it = clients.begin(); it != clients.end(); it++){
-        nextIt = it;
-        nextIt++;
-        if(nextIt == clients.end())
-            break;
-        hQuitCmd(iss, it);
-        it = nextIt;
+        close(it->first);
+        delete it->second;
+        i++;
     }
-    if(it != clients.end())
-        hQuitCmd(iss, it);
     closeConnections();
     for(itChannel = serverChannels.begin(); itChannel != serverChannels.end(); itChannel++){
         delete *itChannel;
@@ -195,24 +190,3 @@ void Server::setConnection(int epollfd){
 void Server::sendMsgServ(const std::string &msg, int clientSocket) const {
     send(clientSocket, msg.c_str(), msg.length(), 0);
 }
-
-// Channel* Server::findOrCreateChannel(const std::string& channelName) {
-//     std::vector<Channel*>::iterator it;
-//     for (it = serverChannels.begin(); it != serverChannels.end(); it++) {
-//         if ((*it)->name == channelName) {
-//             return *it;
-//         }
-//     }
-
-//     std::cout << "Channel not found, creating new channel: " << channelName << "\n";
-//     Channel* newChannel = new Channel(channelName);
-//     if(newChannel == NULL) {
-//         std::cout << "Error creating channel\n";
-//         return NULL;
-//     }
-//     newChannel->setMode("+t");
-//     newChannel->setMode("+o");
-//     serverChannels.push_back(newChannel);
-//     std::cout << "Channel created: " << channelName << " with default modes: +t +o\n";
-//     return newChannel;
-// }

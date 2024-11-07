@@ -290,8 +290,8 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     sendMsgServ("ERROR :Closing Link: " + client->getNick() + " (" + quitMessage + ")\r\n", it->first);
     epoll_ctl(epollfd, EPOLL_CTL_DEL, it->first, NULL);
     close(it->first);
+    delete it->second;
     clients.erase(it);
-    delete client;
 }
 
 void Server::hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it) {

@@ -29,6 +29,7 @@ void Server::hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it
         return;
     }
     Client *targetClient = getClient(targetUser);
+    std::cout << targetClient->getNick() << std::endl;
     if(!targetClient) {
         sendMsgServ(ERR_NOSUCHNICK(it->second->getNick(), targetUser), it->first);
         return;
