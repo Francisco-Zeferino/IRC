@@ -29,13 +29,15 @@ void Server::hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it
         return;
     }
     Client *targetClient = getClient(targetUser);
-    std::cout << targetClient->getNick() << std::endl;
+    //std::cout << targetClient->getNick() << std::endl;
     if(!targetClient) {
+        std::cout << "Here" << std::endl;
         sendMsgServ(ERR_NOSUCHNICK(it->second->getNick(), targetUser), it->first);
         return;
     }
-    std::map<Client *, std::string>::iterator fileIt = targetClient->filePool.find(it->second);
-    if(fileIt == targetClient->filePool.end()) {
+    std::map<Client *, std::string>::iterator fileIt = it->second->filePool.find(targetClient);
+    if(fileIt == it->second->filePool.end()) {
+        std::cout << "Here2" << std::endl;
         sendMsgServ(ERR_NOSUCHNICK(it->second->getNick(), targetUser), it->first);
         return;
     }
@@ -44,4 +46,5 @@ void Server::hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it
     message = RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick(), " :File transfer request accepted");
     sendMsgServ(message, it->first);
     targetClient->filePool.erase(fileIt);
+
 }
