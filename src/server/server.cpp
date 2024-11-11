@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/29 12:32:49 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/11/11 11:10:35 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ Server::~Server() {
 }
 
 void Server::closeConnections(){
-    close(connection);
     close(epollfd);
     close(serverSocket);
 }
@@ -32,17 +31,13 @@ void Server::handleQuitOnSignal(){
     std::map<int, Client*>::iterator nextIt;
     std::vector<Channel*>::iterator itChannel;
     std::stringstream iss;
+    int i = 1;
     
     for(it = clients.begin(); it != clients.end(); it++){
-        nextIt = it;
-        nextIt++;
-        if(nextIt == clients.end())
-            break;
-        hQuitCmd(iss, it);
-        it = nextIt;
+        close(it->first);
+        delete it->second;
+        i++;
     }
-    if(it != clients.end())
-        hQuitCmd(iss, it);
     closeConnections();
     for(itChannel = serverChannels.begin(); itChannel != serverChannels.end(); itChannel++){
         delete *itChannel;

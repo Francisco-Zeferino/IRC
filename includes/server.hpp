@@ -93,6 +93,9 @@ class Server
         void hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hNoticeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hSFCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
+        void hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;

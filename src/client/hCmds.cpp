@@ -133,6 +133,34 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
     }
 }
 
+void Server::hNoticeCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
+    std::string target, message;
+    iss >> target;
+    std::getline(iss, message);
+    bool isChannel = (target[0] == '#'); 
+    
+    if (isChannel) {
+        Channel* channel = findChannel(target);
+        if (!channel) {
+            std::cout << "Channel not found: " << target << "\n";
+            return;
+        }
+        for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
+            if (it->second != channelMap->first) {
+                channel->sendMsg(RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), target, message), channelMap->first->getSocket());
+            }
+        }
+    } else {
+        std::map<int, Client*>::iterator clientIt = clients.begin();
+        while(clientIt != clients.end()){
+            if(target == clientIt->second->getNick())
+                sendMsgServ(RPL_NOTICE(user_info(clientIt->second->getNick(), clientIt->second->getUser()), target, message), clientIt->first);
+            clientIt++;
+        }
+    }
+
+}
+
 void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, targetNick, reason;
     iss >> channelName >> targetNick;
@@ -258,7 +286,7 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     sendMsgServ("ERROR :Closing Link: " + client->getNick() + " (" + quitMessage + ")\r\n", it->first);
     epoll_ctl(epollfd, EPOLL_CTL_DEL, it->first, NULL);
     close(it->first);
+    delete it->second;
     clients.erase(it);
-    delete client;
 }
 
