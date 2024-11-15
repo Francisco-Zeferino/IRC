@@ -22,6 +22,7 @@
 #include <csignal>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <fstream>
 #include <unistd.h>
 #include <cstdlib>
@@ -49,6 +50,8 @@ class Server
         epoll_event event;
         std::map<int, Client* > clients;            //Clients connected to server
         std::vector<Channel* > serverChannels;      //Channels on sever
+        std::stringstream raw;
+
 
         //Socket Management
         void setEpoll();
@@ -91,7 +94,8 @@ class Server
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;
-        void sendFile(std::fstream &cFile, int socket, std::string fileName);
+        void startDcc(const std::string fileName);
+        void setReceiver(size_t fileSize);
         
     public:
         Server();
@@ -103,8 +107,6 @@ class Server
         Channel* createChannel(const std::string& channelName);
         // Channel* findOrCreateChannel(const std::string& channelName);
         void removeChannel(const std::string& channelName);
-        
-        
 };
 
 #endif
