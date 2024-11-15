@@ -2,9 +2,9 @@
 #include "client.hpp"
 
 size_t getFileSize(std::fstream& file) {
-    file.seekg(0, std::ios::end); // Move to the end of the file
-    size_t fileSize = file.tellg(); // Get the current position (file size)
-    file.seekg(0, std::ios::beg); // Move back to the beginning of the file
+    file.seekg(0, std::ios::end);
+    size_t fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
     return fileSize;
 }
 
