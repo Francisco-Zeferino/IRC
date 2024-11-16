@@ -94,8 +94,8 @@ class Server
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hRoverCommands(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;
-        void startDcc(const std::string fileName);
-        void setReceiver(size_t fileSize);
+        void startDcc(const std::string fileName, const std::string savedFileName);
+        void setReceiver(size_t fileSize, std::string fileName);
         
     public:
         Server();

@@ -30,7 +30,7 @@ void setSender(std::string rawData){
     close(sender);
 }
 
-void Server::setReceiver(size_t fileSize){
+void Server::setReceiver(size_t fileSize, std::string fileName){
     int incmoningConnection, bytesReceived;
     struct sockaddr_in receiverAddr, incommingConnectionAddr;
     char buffer[fileSize];
@@ -47,20 +47,17 @@ void Server::setReceiver(size_t fileSize){
         std::cerr << "Error binding receiver socket" << std::endl;
         exit(1);
     }
-    std::cout << "File opened1" << std::endl;
     if(listen(receiver, 1) == -1) {
         std::cerr << "Error listening on receiver socket" << std::endl;
         exit(1);
     }
-    std::cout << "File opened2" << std::endl;
     setSender(raw.str());
     if((incmoningConnection = accept(receiver, (struct sockaddr *)&incommingConnectionAddr, (socklen_t *)&incommingConnectionAddrSize)) == -1) {
         std::cout << "Error accepting connection" << std::endl;
         exit(1);
     }
-    std::cout << "File opened3" << std::endl;
     std::ofstream newFile;
-    newFile.open("newFile", std::ios::out | std::ios::binary);
+    newFile.open(fileName.c_str(), std::ios::out | std::ios::binary);
     while((bytesReceived = recv(incmoningConnection, buffer, fileSize, 0)) > 0) {
         newFile.write(buffer, bytesReceived);
     }
@@ -77,7 +74,7 @@ void Server::setReceiver(size_t fileSize){
     std::cout << "File received" << std::endl;
 }
 
-void Server::startDcc(const std::string fileName){
+void Server::startDcc(const std::string fileName, const std::string savedFileName) {
     std::fstream sFile;
     sFile.open(fileName.c_str(), std::ios::in | std::ios::binary);
     if(!sFile.is_open()) {
@@ -85,7 +82,7 @@ void Server::startDcc(const std::string fileName){
         return;
     }
     raw << sFile.rdbuf();
-    setReceiver(getFileSize(sFile));
+    setReceiver(getFileSize(sFile), savedFileName);
     sFile.close();
 }
 
@@ -104,15 +101,17 @@ void Server::hSFCmd(std::stringstream &iss, std::map<int, Client*>::iterator it)
     targetClient->filePool.insert(std::make_pair(it->second, fileName));
     std::string message = RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), targetUser, " :File transfer request sent");
     sendMsgServ(message, targetClient->getSocket());
-    message = RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick(), " :Command SFA to accept or ignore");
+    message = RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick(), "File Transfer request received. File name is " + fileName);
+    sendMsgServ(message, targetClient->getSocket());
+    message = RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick(), " :Use /SFA <username> <filename to be saved> to accept the file transfer request");
     sendMsgServ(message, targetClient->getSocket());
 }
 
 void Server::hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string targetUser;
-    iss >> targetUser;
+    std::string targetUser, savedFileName;
+    iss >> targetUser >> savedFileName;
     std::cout << targetUser << std::endl;
-    if(targetUser.empty()) {
+    if(targetUser.empty() || savedFileName.empty()) {
         sendMsgServ(ERR_NEEDMOREPARAMS(it->second->getNick(), "SFA"), it->first);
         return;
     }
@@ -130,6 +129,6 @@ void Server::hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it
     sendMsgServ(message, targetClient->getSocket());
     message = RPL_NOTICE(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick(), " :File transfer request accepted");
     sendMsgServ(message, it->first);
-    startDcc(fileIt->second);
-    targetClient->filePool.erase(fileIt);
+    startDcc(fileIt->second, savedFileName);
+    it->second->filePool.erase(fileIt);
 }
