@@ -125,12 +125,10 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         }
         std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
     } else {
-        std::map<int, Client*>::iterator clientIt = clients.begin();
-        while(clientIt != clients.end()){
-            if(target == clientIt->second->getNick())
-                sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), clientIt->first);
-            clientIt++;
-        }
+        Client *targetClient = getClient(target);
+        if(!targetClient)
+            return ;
+        sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), targetClient->getSocket());
     }
 }
 
