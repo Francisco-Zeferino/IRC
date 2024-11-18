@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/18 16:39:27 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/18 19:01:01 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ class Server
         void sendMsgServ(const std::string &msg, int clientSocket) const;
         void startDcc(const std::string fileName, const std::string savedFileName);
         void setReceiver(size_t fileSize, std::string fileName);
+        void serverAuthentication();
         
     public:
         Server();

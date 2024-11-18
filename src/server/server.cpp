@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/18 16:38:30 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/18 19:03:24 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,10 @@ void Server::removeChannel(const std::string& channelName) {
         }
     }
     std::cout << "Channel " << channelName << " not found.\n";
+}
+
+void Server::serverAuthentication(){
+
 }
 
 void Server::setConnection(int epollfd){
