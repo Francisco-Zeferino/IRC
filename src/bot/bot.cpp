@@ -37,9 +37,9 @@ int Server::setBot() {
     return botSocket;
 }
 
-Bot *Server::createBot() {
+Bot Server::createBot() {
     int botSocket = setBot();
-    return new Bot("BoTony", "marvin", botSocket);
+    return Bot("BoTony", "marvin", botSocket);
 }
 
 
@@ -137,16 +137,16 @@ void Server::aBotJoin(std::map<int, Client*>::iterator it, const std::string &ch
         return;
     }
 
-    for (std::vector<Bot*>::iterator botIt = ch->bots.begin(); botIt != ch->bots.end(); ++botIt) {
-        if ((*botIt)->getNick() == "BoTony") {
+    for (std::vector<Bot>::iterator botIt = ch->bots.begin(); botIt != ch->bots.end(); ++botIt) {
+        if ((botIt)->getNick() == "BoTony") {
             sendMsgServ("Bot is already in the channel.\n", it->first);
             return;
         }
     }
 
-    Bot* bot = createBot();
+    Bot bot = createBot();
     ch->bots.push_back(bot);
-    std::string message = ":+" + bot->getNick() + "!" + bot->getUser() + "@localhost JOIN " + ch->name + "\r\n";
+    std::string message = ":+" + bot.getNick() + "!" + bot.getUser() + "@localhost JOIN " + ch->name + "\r\n";
     ch->notifyAllInChannel(ch, message);
 }
 
@@ -162,9 +162,9 @@ void Server::aBotLeave(std::map<int, Client*>::iterator it, const std::string &c
         return;
     }
 
-    std::vector<Bot *>::iterator botIt;
+    std::vector<Bot >::iterator botIt;
     for(botIt = ch->bots.begin(); botIt != ch->bots.end(); botIt++){
-        ch->notifyAllInChannel(ch ,RPL_PART(user_info((*botIt)->getNick(), (*botIt)->getUser()), ch->name));
+        ch->notifyAllInChannel(ch ,RPL_PART(user_info((botIt)->getNick(), (botIt)->getUser()), ch->name));
         ch->bots.erase(botIt);
         break;
     }

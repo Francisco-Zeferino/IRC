@@ -57,7 +57,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    std::string channelName;
    iss >> channelName;
    std::map<Client *, bool>::iterator clientIt;
-   std::vector<Bot *>::iterator botIt;
+   std::vector<Bot >::iterator botIt;
    Channel *channel= findChannel(channelName);
    if (!channel) {
         std::cout << "Channel not found: " << channelName << "\n";
@@ -70,7 +70,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
             channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + getRole(clientIt) + it->second->getNick() + "\r\n", it->first);
     }
     for(botIt = channel->bots.begin(); botIt != channel->bots.end(); botIt++){
-        channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + (*botIt)->getNick() + "\r\n", it->first);
+        channel->sendMsg(":localhost 353 " + it->second->getNick() + " @ " + channelName + " :+" + (botIt)->getNick() + "\r\n", it->first);
     }
     channel->sendMsg(":localhost 366 " + it->second->getNick() + " " + channelName + " :End of /NAMES list.\r\n", it->first);
 }

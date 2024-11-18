@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/18 10:34:42 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/11/18 16:39:27 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class Server
         
         //Bot
         int setBot();
-        Bot *createBot();
+        Bot createBot();
         void aBotJoin(std::map<int, Client*>::iterator it, const std::string &channelName);
         void aBotHelp(std::map<int, Client*>::iterator it, const std::string &channelName);
         void aBotLeave(std::map<int, Client*>::iterator it, const std::string &channelName);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/11 11:10:35 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/11/18 16:38:30 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,11 @@ void Server::closeConnections(){
 
 void Server::handleQuitOnSignal(){
     std::map<int, Client*>::iterator it;
-    std::map<int, Client*>::iterator nextIt;
     std::vector<Channel*>::iterator itChannel;
-    std::stringstream iss;
-    int i = 1;
     
     for(it = clients.begin(); it != clients.end(); it++){
         close(it->first);
         delete it->second;
-        i++;
     }
     closeConnections();
     for(itChannel = serverChannels.begin(); itChannel != serverChannels.end(); itChannel++){
