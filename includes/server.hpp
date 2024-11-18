@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/10/29 15:33:14 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/11/18 10:34:42 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 #include <csignal>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <fstream>
 #include <unistd.h>
 #include <cstdlib>
 #include <map>
@@ -52,7 +54,11 @@ class Server
         int epollfd;
         int nfds;
         epoll_event event;
-        
+        std::map<int, Client* > clients;            //Clients connected to server
+        std::vector<Channel* > serverChannels;      //Channels on sever
+        std::stringstream raw;
+
+
         //Socket Management
         void setEpoll();
         void createSocket();
@@ -99,11 +105,9 @@ class Server
         void hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it);
         void sendMsgServ(const std::string &msg, int clientSocket) const;
-    
-    protected:
-        std::map<int, Client* > clients;            //Clients connected to server
-        std::vector<Channel* > serverChannels;      //Channels on sever
-
+        void startDcc(const std::string fileName, const std::string savedFileName);
+        void setReceiver(size_t fileSize, std::string fileName);
+        
     public:
         Server();
         ~Server();
@@ -113,7 +117,6 @@ class Server
         Channel* findChannel(const std::string& channelName);
         Channel* createChannel(const std::string& channelName);
         void removeChannel(const std::string& channelName);
-         
 };
 
 #endif
