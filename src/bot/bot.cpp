@@ -178,7 +178,7 @@ void Server::aBotHello(std::map<int, Client*>::iterator it, const std::string &c
     //     return;
     // }
 
-    std::string helloResponse = "YOOOOOOOOOOOOO, " + it->second->getNick() + "!";
+    std::string helloResponse = " YOOOOOOOOOOOOO, " + it->second->getNick() + "!";
     sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, helloResponse), it->first);
 }
 

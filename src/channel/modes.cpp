@@ -82,7 +82,7 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
         return;
     }
     admins[targetClient] = addOperator;
-    std::string modeChangeMsg = ":localhost MODE " + name + (addOperator ? " +o " : " -o ") + targetNick + "\r\n";
+    std::string modeChangeMsg = ":" + requester->getNick() + " MODE " + name + (addOperator ? " +o " : " -o ") + targetNick + "\r\n";
     notifyAllInChannel(this, modeChangeMsg);
 }
 
@@ -104,7 +104,7 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *request
         iss >> newPassword;
 
         if (newPassword.empty()) {
-            std::string errorMsg = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " +k :No password was provided.\r\n";
+            std::string errorMsg = ERR_PASSWDMISMATCH();
             notifyAllInChannel(this, errorMsg);
             return;
         }
@@ -125,15 +125,22 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *request
     }
 }
 
-
+bool isValid(std::string toCheck){
+    for(size_t i = 0; i < toCheck.length(); i++){
+        if(isdigit(toCheck[i]) == 0)
+            return false;
+    }
+    return true;
+}
 
 void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
     if (enable) {
-        size_t newLimit;
+        std::string newLimit;
         iss >> newLimit;
-
-        if (newLimit > 0) {
-            userslimit = newLimit;
+        if(newLimit.empty())
+            return ;
+        if (isValid(newLimit)) {
+            userslimit = atoi(newLimit.c_str());
             mode = "l";
             std::cout << "User limit set to " << userslimit << " for channel: " << name << std::endl;
             notifyAllInChannel(this, ":localhost " + iss.str() + "\r\n");

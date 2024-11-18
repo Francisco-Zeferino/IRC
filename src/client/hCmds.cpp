@@ -105,6 +105,7 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->removeClient(it->second);
 }
 
+//TODO : check if user exists.
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, message;
     iss >> target;
@@ -127,7 +128,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
         std::map<int, Client*>::iterator clientIt = clients.begin();
         while(clientIt != clients.end()){
             if(target == clientIt->second->getNick())
-                sendMsgServ(RPL_PRIVMSG(user_info(clientIt->second->getNick(), clientIt->second->getUser()), target, message), clientIt->first);
+                sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), clientIt->first);
             clientIt++;
         }
     }
@@ -205,7 +206,8 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     iss >> targetNick >> targetChannel;
 
     Channel* channel = findChannel(targetChannel); //alt
-
+    if(!channel)
+        return ;
     if (!channel->isAdmin(it->second)) {
         channel->sendMsg(ERR_CHANOPRIVSNEEDED(it->second->getNick(), targetChannel), it->first);
         return;
@@ -243,6 +245,10 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
 
     Channel* channel = findChannel(channelName);
     if (!channel) {
+        channel->sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
+        return;
+    }
+    if(channel->admins.find(it->second) == channel->admins.end()){
         channel->sendMsg(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
         return;
     }
