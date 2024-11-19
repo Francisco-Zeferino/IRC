@@ -2,10 +2,9 @@
 # define CLIENT_HPP
 
 #include "server.hpp"
-// #include "channel.hpp"
 
 #define MAX_CLIENTS 100
-#define BUFFER_SIZE 100 //porque alteraste?
+#define BUFFER_SIZE 100
 
 class Channel;
 
@@ -17,6 +16,7 @@ class Client
 
         std::vector<Channel *> clientChannels;
         std::map<Client *, std::string> filePool;
+
         // Getters
         int getSocket() const;
         std::string getNick() const;
@@ -25,10 +25,7 @@ class Client
         // Setters
         void setNick(const std::string &nickname);
         void setUser(const std::string &username);
-
-
-    private:
-
+        
     protected:
         int _socket;
         std::string _nick;

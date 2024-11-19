@@ -105,7 +105,6 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->removeClient(it->second);
 }
 
-//TODO : check if user exists.
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, message;
     iss >> target;
@@ -157,7 +156,6 @@ void Server::hNoticeCmd(std::stringstream &iss, std::map<int, Client*>::iterator
             clientIt++;
         }
     }
-
 }
 
 void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -203,7 +201,7 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     std::string targetNick, targetChannel;
     iss >> targetNick >> targetChannel;
 
-    Channel* channel = findChannel(targetChannel); //alt
+    Channel* channel = findChannel(targetChannel);
     if(!channel)
         return ;
     if (!channel->isAdmin(it->second)) {
@@ -218,7 +216,7 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
 
     Client* targetClient = getClient(targetNick);
     if (!targetClient) {
-        channel->sendMsg(ERR_NOSUCHNICK(it->second->getNick(), targetNick), it->first);  // No such user
+        channel->sendMsg(ERR_NOSUCHNICK(it->second->getNick(), targetNick), it->first);
         return;
     }
 
@@ -293,4 +291,3 @@ void Server::hQuitCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     delete it->second;
     clients.erase(it);
 }
-

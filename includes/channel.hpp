@@ -17,7 +17,6 @@ class Channel {
         std::string password;   //+k
         size_t      userslimit; //+l
         
-
         std::map<Client *, bool> admins;
         std::vector<Bot > bots;
         std::vector<std::string> invUsers;
@@ -47,6 +46,20 @@ class Channel {
         // Comunication
         void sendMsg(const std::string &msg, int clientSocket);
         void notifyAllInChannel(Channel *channel, std::string message);
+
+        // Bot
+        bool hasBot(const std::string& botNick) const;
+        // hangman values
+        bool hangmanActive;
+        std::string hangmanWord;
+        std::string hangmanProgress;
+        std::vector<char> hangmanGuesses;
+        int hangmanLives;
+        // Hangman functions
+        bool startHangman(const std::string& word);
+        bool guessLetter(char letter, std::string& resultMsg);
+        bool solveWord(const std::string& guess, std::string& resultMsg);
+        void resetHangman();
 
 };
 

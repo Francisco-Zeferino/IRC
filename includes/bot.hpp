@@ -7,16 +7,13 @@ class Bot {
     public:
         Bot();
         Bot(std::string nick, std::string user, int socket);
+        ~Bot();
 
         std::string getUser() const;
         std::string getNick() const;
         int getSocket() const;
 
-        // std::string hBotCmd(const std::string& cmd);
-        
-
     private:
-        std::string channel; // it is needed?
         std::string nick;
         std::string user;
         int socket;
@@ -24,43 +21,3 @@ class Bot {
 
 #endif
 
-
-// #include "server.hpp"
-// #include "channel.hpp"
-// #include "irc.hpp"
-
-// class Server;
-// class Channel;
-// class Client;
-
-// class Bot : public Client {
-//     public:
-//         Bot(int socket);
-//         void banana();
-
-//     private:
-    // void valitadeBotMsg(const std::string &message);
-
-    // void greetBotMsg(Channel *channel);
-    // void timeBotMsg(Channel* channel);
-    // void sendBotMsg(Channel* channel, const std::string& message);
-        
-        // int botSocket;
-        // std::string _botnick;
-        // std::string _botuser;
-// };
-
-
-
-
-
-// class Bot : public Client {
-//     public:
-//         Bot(int socket, const std::string &nick, const std::string &user);
-//         void valitadeBotMsg(const std::string &message, Channel *channel);
-
-//     private:
-//         void greetBotMsg(Channel *channel);
-//         void timeBotMsg(Channel *channel);
-//         void sendBotMsg(Channel *channel, const std::string &message);
-// };

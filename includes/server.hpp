@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/18 19:01:01 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:14:28 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@
 #include <ctime>
 #include <iomanip>
 
-
-
 class Client;
 class Channel;
 class Bot;
@@ -58,7 +56,6 @@ class Server
         std::vector<Channel* > serverChannels;      //Channels on sever
         std::stringstream raw;
 
-
         //Socket Management
         void setEpoll();
         void createSocket();
@@ -77,6 +74,7 @@ class Server
         void aBotLeave(std::map<int, Client*>::iterator it, const std::string &channelName);
         void aBotHello(std::map<int, Client*>::iterator it, const std::string &channelName);
         void aBotTime(std::map<int, Client*>::iterator it, const std::string &channelName);
+        void aBotHangman(std::map<int, Client*>::iterator it, const std::string &channelName, std::stringstream &iss);
         
         //Epoll state management
         void epollState(int epollfd, int socket, uint32_t newEvent);
@@ -118,6 +116,7 @@ class Server
         Channel* findChannel(const std::string& channelName);
         Channel* createChannel(const std::string& channelName);
         void removeChannel(const std::string& channelName);
-};
+
+};  
 
 #endif
