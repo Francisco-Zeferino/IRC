@@ -11,10 +11,6 @@ Bot::~Bot(){
 Bot::Bot(std::string nick, std::string user, int socket)
     : nick(nick), user(user), socket(socket) {}
 
-Bot::~Bot() {
-    close(socket);
-};
-
 std::string Bot::getUser() const {
     return user;
 }

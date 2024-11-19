@@ -93,6 +93,7 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
     } else if(command == "!BOT") {
         hBotCmd(iss, it);
     } else {
+        epollState(epollfd, it->first, EPOLLIN);
         return;
     }
     epollState(epollfd, it->first, EPOLLIN);
