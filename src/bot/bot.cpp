@@ -11,6 +11,10 @@ Bot::~Bot(){
 Bot::Bot(std::string nick, std::string user, int socket)
     : nick(nick), user(user), socket(socket) {}
 
+Bot::~Bot() {
+    close(socket);
+};
+
 std::string Bot::getUser() const {
     return user;
 }
@@ -46,91 +50,31 @@ Bot Server::createBot() {
     return Bot("BoTony", "marvin", botSocket);
 }
 
-
-
-// void Server::hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-//     std::string command, channel;
-//     iss >> command >> channel;
-
-//     Channel* ch = findChannel(channel);
-
-//     if(command == "join") {
-//         if (!ch) {
-//             sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channel), it->first);
-//             return;
-//         }
-        
-//         std::map<Client *, bool>::iterator user = ch->admins.find(it->second);
-//         if(user->second == false){
-//             sendMsgServ(ERR_CHANOPRIVSNEEDED(it->second->getNick(), channel), it->first);
-//             return;
-//         }
-
-//         std::vector<Bot*>::iterator botIt;
-//         for (botIt = ch->bots.begin(); botIt != ch->bots.end(); ++botIt) {
-//             if ((*botIt)->getNick() == "BoTony") {
-//                 sendMsgServ("Bot is already in the channel.\n", it->first);
-//                 return;
-//             }
-//         }
-
-//         Bot *bot = createBot();
-//         ch->bots.push_back(bot);
-//         std::string message = ":+" + bot->getNick() + "!" + bot->getUser() + "@localhost JOIN " + ch->name + "\r\n";
-//         ch->notifyAllInChannel(ch, message);
-//     }
-
-
-
-//     else if(command == "help") {
-//         std::string message = " : Commands available: join, ola, time, leave, gg.\r\n";
-//         sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), channel, message), it->first);
-//     }
-
-//     else if(command == "leave") {
-//         std::vector<Bot *>::iterator botIt;
-//         if (!ch) {
-//             sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channel), it->first);
-//             return;
-//         }
-//         for(botIt = ch->bots.begin(); botIt != ch->bots.end(); botIt++){
-//             ch->notifyAllInChannel(ch ,RPL_PART(user_info((*botIt)->getNick(), (*botIt)->getUser()), ch->name));
-//             ch->bots.erase(botIt);
-//             break;
-//         }
-//     }
-// }
-
-
-
 void Server::hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
-    std::string command, arg2, arg3;
-    iss >> command >> arg2 >> arg3;
-    if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
-        return ;
-    }
-    if (command == "join") {
-        aBotJoin(it, arg2);
-    }
-    else if (command == "help") {
-        aBotHelp(it, arg2);
-    }
-    else if (command == "leave") {
-        aBotLeave(it, arg2);
-    }
-    else if (command == "hello" || command == "ola") {
-        aBotHello(it, arg2);
-    }
-    else if (command == "time") {
-        aBotTime(it, arg2);
-    }
-    else {
-        sendMsgServ("Unknown command\n", it->first);
+    std::string command, channelName;
+    iss >> command >> channelName;
+    std::cout << " STRING: "<< command << " " << channelName << " " << "\n";
+    if (command == "hangman") {
+        if (channelName.empty()) {
+            sendMsgServ("Usage: /BOT hangman <start|guess|solve> <channel> [word|letter]\n", it->first);
+            return;
+        }
+        aBotHangman(it, channelName, iss);
+    } else if (command == "join") {
+        aBotJoin(it, channelName);
+    } else if (command == "help") {
+        aBotHelp(it, channelName);
+    } else if (command == "leave") {
+        aBotLeave(it, channelName);
+    } else if (command == "hello" || command == "ola") {
+        aBotHello(it, channelName);
+    } else if (command == "time") {
+        aBotTime(it, channelName);
+    } else {
+        sendMsgServ("Unknown BOT command.\n", it->first);
     }
 }
 
-// Function to handle 'join' command
 void Server::aBotJoin(std::map<int, Client*>::iterator it, const std::string &channelName) {
     Channel* ch = findChannel(channelName);
     if (!ch) {
@@ -158,8 +102,19 @@ void Server::aBotJoin(std::map<int, Client*>::iterator it, const std::string &ch
 }
 
 void Server::aBotHelp(std::map<int, Client*>::iterator it, const std::string &channelName) {
-    std::string message = " : Commands available: join, ola, time, leave, gg.\r\n";
-    sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), channelName, message), it->first);
+    Channel* ch = findChannel(channelName);
+    if (!ch) {
+        sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
+        return;
+    }
+
+    if (!ch->hasBot("BoTony")) {
+        sendMsgServ("BoTony is not in the channel.\n", it->first);
+        return;
+    }
+
+    std::string message = "Commands available: join, ola, time, leave, gg.\r\n";
+    ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, message));
 }
 
 void Server::aBotLeave(std::map<int, Client*>::iterator it, const std::string &channelName) {
@@ -171,37 +126,55 @@ void Server::aBotLeave(std::map<int, Client*>::iterator it, const std::string &c
 
     std::vector<Bot >::iterator botIt;
     for(botIt = ch->bots.begin(); botIt != ch->bots.end(); botIt++){
-        ch->notifyAllInChannel(ch ,RPL_PART(user_info((botIt)->getNick(), (botIt)->getUser()), ch->name));
+        ch->notifyAllInChannel(ch ,RPL_PART(user_info((botIt)->getNick(), (botIt)->getUser()), channelName));
         ch->bots.erase(botIt);
         break;
     }
 }
 
 
-void Server::aBotHello(std::map<int, Client*>::iterator it, const std::string &channelName) {
-    // Channel* ch = findChannel(channelName);
-    // if (!ch) {
-    //     sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
-    //     return;
-    // }
-
-    std::string helloResponse = " YOOOOOOOOOOOOO, " + it->second->getNick() + "!";
-    sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, helloResponse), it->first);
-}
-
-// Function to handle 'time' command
 void Server::aBotTime(std::map<int, Client*>::iterator it, const std::string &channelName) {
-    // Channel* ch = findChannel(channelName);
-    // if (!ch) {
-    //     sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
-    //     return;
-    // }
+    Channel* ch = findChannel(channelName);
+    if (!ch) {
+        sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
+        return;
+    }
 
+    if (!ch->hasBot("BoTony")) {
+        sendMsgServ("BoTony is not in the channel.\n", it->first);
+        return;
+    }
 
     std::time_t currentTime = std::time(0);
     std::string timeStr = std::ctime(&currentTime);
     timeStr.erase(timeStr.find_last_not_of(" \n\r\t") + 1);
 
     std::string timeResponse = "Current time is: " + timeStr + " ";
-    sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, timeResponse), it->first);
+    ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, timeResponse));
+}
+
+
+void Server::aBotHello(std::map<int, Client*>::iterator it, const std::string &channelName) {
+    Channel* ch = findChannel(channelName);
+    if (!ch) {
+        sendMsgServ(ERR_NOSUCHCHANNEL(it->second->getNick(), channelName), it->first);
+        return;
+    }
+
+    if (!ch->hasBot("BoTony")) {
+        sendMsgServ("BoTony is not in the channel.\n", it->first);
+        return;
+    }
+
+    std::string helloResponse = "YOOOOOOOOOOOOO, tudo fixe " + it->second->getNick() + "?";
+    ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, helloResponse));
+}
+
+bool Channel::hasBot(const std::string& botNick) const {
+    for (std::vector<Bot>::const_iterator botIt = bots.begin(); botIt != bots.end(); ++botIt) {
+        if (botIt->getNick() == botNick) {
+            return true;
+        }
+    }
+    return false;
 }

@@ -7,8 +7,8 @@
 #define RPL_INVITING(user_info, target, channel) (user_info + " INVITING " + target + " " + channel + "\r\n")
 //
 #define RPL_INVITE(user_info, target, channel) (user_info + " INVITE " + target + " " + channel + "\r\n")
-//
-#define RPL_PRIVMSG(user_info, target, message) (user_info + " PRIVMSG " + target + message + "\r\n")
+#define RPL_PRIVMSG(user_info, target, message) (user_info + " PRIVMSG " + target + " :" + message + "\r\n")
+// #define RPL_PRIVMSG(user_info, target, message) (user_info + " PRIVMSG " + target + message + "\r\n")
 #define RPL_NOTICE(user_info, target, message) (user_info + " NOTICE " + target + message + "\r\n")
 // Successful operator promotion
 #define RPL_OPGIVEN(nick, target, channel) (":localhost 324 " + nick + " " + target + " " + channel + " :\00303" + target + " is now a channel operator\00303\r\n")
@@ -28,7 +28,7 @@
 ///////////////////// ERRORS MESSAGES //////////////////////
 // 
 #define ERR_NOOPERHOST(nick, channel)(":localhost 491 " + nick + " " + channel + " :\00304Given user not in channel\00304\r\n")
-// 
+// aaa
 #define ERR_PASSWDMISMATCH()(":localhost 464 : \00304Incorrect password\00304\r\n")
 // 
 #define ERR_CHANNELISFULL(nick, channel)(":localhost 471 " + nick + " " + channel + " :\00304Can't join channel, max user reached!\00304\r\n")

@@ -60,7 +60,7 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
     std::string targetNick;
     iss >> targetNick;
 
-    Client* targetClient = NULL; ///corigir esta verificacao + if
+    Client* targetClient = NULL;
     for (std::map<Client*, bool>::iterator it = admins.begin(); it != admins.end(); ++it) {
         if (it->first->getNick() == targetNick) {
             targetClient = it->first;
@@ -71,7 +71,7 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
         sendMsg(ERR_NOOPERHOST(requester->getNick(), name), requester->getSocket());
         return;
     }
-    // Defense for self removal op
+
     if (targetClient == requester && !addOperator) {
         std::string message = ":localhost 481 " + requester->getNick() + " " + name + " :\00304You cannot remove your own operator status!\00304\r\n";
         sendMsg(message, requester->getSocket());
@@ -162,9 +162,6 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
             return;
         }
     }
-
-    // std::string modeChangeMsg = ":localhost MODE " + name + << " (userslimit) : " -l") + "\r\n";
-    // notifyAllInChannel(this, modeChangeMsg);
 }
 
 void Channel::aTopicMode(bool enable) {

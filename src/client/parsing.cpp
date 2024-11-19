@@ -59,48 +59,41 @@ void Server::parseMessage(const std::string &message, std::map<int, Client*>::it
     std::stringstream iss(message);
     std::string command;
     iss >> command;
-    if (command == "NICK") {            //finish
+    if (command == "NICK") {
         hNickCmd(iss, it);
-    } else if (command == "USER") {     //finish
+    } else if (command == "USER") {
         hUserCmd(iss, it);
-    } else if (command == "JOIN") {     //finish
+    } else if (command == "JOIN") {
         hJoinCmd(iss, it);
     }else if(command == "SF") {
         hSFCmd(iss, it);
     }else if(command == "SFA") {
         hSFACmd(iss, it);
-    }else if (command == "PART") {     //finish
+    }else if (command == "PART") {
         hPartCmd(iss, it);
-    } else if (command == "PRIVMSG") {  //finish
+    } else if (command == "PRIVMSG") {
         hPrivMsgCmd(iss, it);
-    } else if (command == "KICK") {     //finish
+    } else if (command == "KICK") {
         hKickCmd(iss, it);
-    } else if (command == "INVITE") {   //finish
+    } else if (command == "INVITE") {
         hInviteCmd(iss, it);
-    } else if (command == "TOPIC") {    //finish corrigir -t do op
+    } else if (command == "TOPIC") {
         hTopicCmd(iss, it);
     }else if(command == "NOTICE"){
         hNoticeCmd(iss, it);
-    } else if (command == "MODE") {     //finish
+    } else if (command == "MODE") {
         hModeCmd(iss, it);
-    } else if (command == "WHO") {      //
+    } else if (command == "WHO") {
         hWhoCmd(iss, it);
-    } else if (command == "PASS") {     //finish
+    } else if (command == "PASS") {
         hPassCmd(iss, it);
-    } else if (command == "QUIT") {     //finish finalisar ctrl c
+    } else if (command == "QUIT") {
         hQuitCmd(iss, it);
         return ;
-    } else if(command == "BOT") {      //alterar cmds e names
+    } else if(command == "!BOT") {
         hBotCmd(iss, it);
     } else {
         return;
     }
     epollState(epollfd, it->first, EPOLLIN);
 }
-
-// Bot join #a 
-// Bot leave #a
-// Bot Ola
-// Bot time
-// Bot send ./bla/fdx.txt manuel
-// Bot gg
