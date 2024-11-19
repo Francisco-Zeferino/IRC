@@ -13,20 +13,21 @@ void setSender(std::string rawData){
     int sender = socket(AF_INET, SOCK_STREAM, 0);
     if(sender == -1) {
         std::cerr << "Error creating sender socket" << std::endl;
-        exit(1);
+        return ;
     }
     senderAddr.sin_family = AF_INET;
     senderAddr.sin_port = htons(9000);
     senderAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     if(connect(sender, (struct sockaddr *)&senderAddr, sizeof(senderAddr)) == -1) {
         std::cerr << "Error connecting to server" << std::endl;
-        exit(1);
+        return ;
     }
     int size = send(sender, rawData.c_str(), rawData.size(), 0);
     if(size == -1) {
         std::cerr << "Error sending data" << std::endl;
-        exit(1);
+        return ;
     }
+    rawData.clear();
     close(sender);
 }
 
@@ -38,23 +39,23 @@ void Server::setReceiver(size_t fileSize, std::string fileName){
     int receiver = socket(AF_INET, SOCK_STREAM, 0);
     if(receiver == -1) {
         std::cerr << "Error creating receiver socket" << std::endl;
-        exit(1);
+        return ;
     }
     receiverAddr.sin_family = AF_INET;
     receiverAddr.sin_port = htons(9000);
     receiverAddr.sin_addr.s_addr = INADDR_ANY;
     if(bind(receiver, (struct sockaddr *)&receiverAddr, sizeof(receiverAddr)) == -1) {
         std::cerr << "Error binding receiver socket" << std::endl;
-        exit(1);
+        return ;
     }
     if(listen(receiver, 1) == -1) {
         std::cerr << "Error listening on receiver socket" << std::endl;
-        exit(1);
+        return ;
     }
     setSender(raw.str());
     if((incmoningConnection = accept(receiver, (struct sockaddr *)&incommingConnectionAddr, (socklen_t *)&incommingConnectionAddrSize)) == -1) {
         std::cout << "Error accepting connection" << std::endl;
-        exit(1);
+        return ;
     }
     std::ofstream newFile;
     newFile.open(fileName.c_str(), std::ios::out | std::ios::binary);
@@ -63,7 +64,7 @@ void Server::setReceiver(size_t fileSize, std::string fileName){
     }
     if(bytesReceived == -1) {
         std::cerr << "Error receiving data" << std::endl;
-        exit(1);
+        return ;
     }
     if(bytesReceived == 0) {
         std::cout << "File received" << std::endl;
@@ -89,6 +90,10 @@ void Server::startDcc(const std::string fileName, const std::string savedFileNam
 void Server::hSFCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string targetUser, fileName;
     iss >> targetUser >> fileName;
+    if(isClientAuthenticated(it->second) == false){
+        std::cout << "Not authenticated to server. Can't send a file" << std::endl;
+        return ;
+    }
     if(targetUser.empty() || fileName.empty()) {
         sendMsgServ(ERR_NEEDMOREPARAMS(it->second->getNick(), "SF"), it->first);
         return;
@@ -110,6 +115,10 @@ void Server::hSFCmd(std::stringstream &iss, std::map<int, Client*>::iterator it)
 void Server::hSFACmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string targetUser, savedFileName;
     iss >> targetUser >> savedFileName;
+    if(isClientAuthenticated(it->second) == false){
+        std::cout << "Not authenticated to server. Can't accept a file." << std::endl;
+        return ;
+    }
     std::cout << targetUser << std::endl;
     if(targetUser.empty() || savedFileName.empty()) {
         sendMsgServ(ERR_NEEDMOREPARAMS(it->second->getNick(), "SFA"), it->first);

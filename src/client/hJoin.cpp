@@ -5,7 +5,10 @@
 void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName;
     iss >> channelName;
-
+    if(isClientAuthenticated(it->second) == false){
+        std::cout << "Not authenticated to server. Can't join a channel" << std::endl;
+        return ;
+    }
     bool isChannel = (channelName[0] == '#');
     if (!isChannel) {
         std::cout << channelName << " is not a valid channel name\n";
@@ -69,11 +72,11 @@ void Server::hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
     if (this->password != receivedPassword) {
         sendMsgServ(ERR_PASSWDMISMATCH(), it->first);
-        close(it->first);
-        std::cout << "Client disconnected due to incorrect password\n";
+        std::cout << "Incorrect password. Connection cannot be established\n";
         
     } else {
         std::cout << "Client " << it->second->getNick() << " authenticated with correct server password\n";
+        it->second->passwordAuthenticated = true;
     }
     
 }

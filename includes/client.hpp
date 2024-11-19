@@ -17,6 +17,9 @@ class Client
 
         std::vector<Channel *> clientChannels;
         std::map<Client *, std::string> filePool;
+        std::string messageBuffer;
+        bool isAuthenticated;
+        bool passwordAuthenticated;
         // Getters
         int getSocket() const;
         std::string getNick() const;
@@ -26,14 +29,12 @@ class Client
         void setNick(const std::string &nickname);
         void setUser(const std::string &username);
 
-
     private:
 
     protected:
         int _socket;
         std::string _nick;
         std::string _user;
-
 };
 
 #endif

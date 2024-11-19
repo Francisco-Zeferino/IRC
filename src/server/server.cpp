@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/18 19:03:24 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:19:41 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,6 @@ void Server::setEpoll() {
     }
     
     struct epoll_event clientEvent[1024];
-    
     while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
         if(nfds == -1){
@@ -142,6 +141,12 @@ Channel* Server::findChannel(const std::string& channelName) {
     return NULL;
 }
 
+bool Server::isClientAuthenticated(Client *client){
+    if(client->isAuthenticated == true)
+        return true;
+    return false;
+}
+
 Channel* Server::createChannel(const std::string& channelName) {
     std::cout << "Creating new channel: " << channelName << "\n";
     Channel* newChannel = new Channel(channelName);
@@ -169,10 +174,6 @@ void Server::removeChannel(const std::string& channelName) {
         }
     }
     std::cout << "Channel " << channelName << " not found.\n";
-}
-
-void Server::serverAuthentication(){
-
 }
 
 void Server::setConnection(int epollfd){

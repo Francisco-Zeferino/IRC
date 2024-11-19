@@ -4,6 +4,10 @@
 
 Bot::Bot() {}
 
+Bot::~Bot(){
+    close(socket);
+}
+
 Bot::Bot(std::string nick, std::string user, int socket)
     : nick(nick), user(user), socket(socket) {}
 
@@ -102,7 +106,10 @@ Bot Server::createBot() {
 void Server::hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string command, arg2, arg3;
     iss >> command >> arg2 >> arg3;
-
+    if(isClientAuthenticated(it->second) == false){
+        std::cout << "Not authenticated to server." << std::endl;
+        return ;
+    }
     if (command == "join") {
         aBotJoin(it, arg2);
     }

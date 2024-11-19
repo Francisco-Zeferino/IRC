@@ -6,7 +6,10 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, mode;
     iss >> channelName >> mode;
 
-
+    if(isClientAuthenticated(it->second) == false){
+        std::cout << "Not authenticated to server." << std::endl;
+        return ;
+    }
     Channel* channel = findChannel(channelName); //alt
     if (!channel) {
         std::cout << "Channel not found: " << channelName << "\n";

@@ -4,7 +4,7 @@
 
 Client::Client() {}
 
-Client::Client(int socket) : _socket(socket) {}
+Client::Client(int socket) : isAuthenticated(false), passwordAuthenticated(false), _socket(socket) {}
 
 int Client::getSocket() const {
     return _socket;

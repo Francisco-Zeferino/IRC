@@ -7,6 +7,7 @@ class Bot {
     public:
         Bot();
         Bot(std::string nick, std::string user, int socket);
+        ~Bot();
 
         std::string getUser() const;
         std::string getNick() const;

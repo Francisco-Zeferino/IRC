@@ -91,3 +91,14 @@ void Channel::notifyAllInChannel(Channel *channel, std::string message){
     }
 }
 
+void Channel::notifyAllClients(Client *client, std::string message){
+    std::map<Client *, bool>::iterator it;
+    
+    it = admins.begin();
+    while(it != admins.end()) {
+        if(client != it->first)
+            sendMsg(message,it->first->getSocket());
+        it++;
+    }
+}
+

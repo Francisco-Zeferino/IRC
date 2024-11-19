@@ -47,6 +47,7 @@ class Channel {
         // Comunication
         void sendMsg(const std::string &msg, int clientSocket);
         void notifyAllInChannel(Channel *channel, std::string message);
+        void notifyAllClients(Client *client, std::string message);
 
 };
 

@@ -6,7 +6,7 @@
 /*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/18 19:01:01 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:19:46 by ffilipe-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 #include <vector>
 #include <sys/epoll.h>
 #include <errno.h>
+
 
 #include "numeric_responses.hpp"
 
@@ -85,6 +86,8 @@ class Server
         void handleClientMessage(int clientSocket);
         bool validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel *channel);
         Client *getClient(const std::string user);
+        Client *getClientByFd(int socketFd);
+        bool getClientMessage(int clientSocket, int &bytesRead);
 
         // Command handling
         void parseMessage(const std::string &message, std::map<int, Client*>::iterator it);
@@ -107,7 +110,7 @@ class Server
         void sendMsgServ(const std::string &msg, int clientSocket) const;
         void startDcc(const std::string fileName, const std::string savedFileName);
         void setReceiver(size_t fileSize, std::string fileName);
-        void serverAuthentication();
+        bool isClientAuthenticated(Client *client);
         
     public:
         Server();
