@@ -1,7 +1,7 @@
 #include "server.hpp"
 #include "client.hpp"
 
-size_t getFileSize(std::fstream& file) {
+size_t getFileSize(std::ifstream& file) {
     file.seekg(0, std::ios::end);
     size_t fileSize = file.tellg();
     file.seekg(0, std::ios::beg);
@@ -76,7 +76,7 @@ void Server::setReceiver(size_t fileSize, std::string fileName){
 }
 
 void Server::startDcc(const std::string fileName, const std::string savedFileName) {
-    std::fstream sFile;
+    std::ifstream sFile;
     sFile.open(fileName.c_str(), std::ios::in | std::ios::binary);
     if(!sFile.is_open()) {
         std::cerr << "Error opening file" << std::endl;
