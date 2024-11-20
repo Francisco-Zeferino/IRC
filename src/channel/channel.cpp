@@ -2,7 +2,7 @@
 #include "client.hpp"
 #include "server.hpp"
 
-Channel::Channel(std::string name) : name(name), userslimit(0) {}
+Channel::Channel(std::string name) : name(name), userslimit(0), hangmanActive(false) {}
 
 void Channel::setPassword(const std::string password){
     this->password = password;
@@ -77,7 +77,7 @@ bool Channel::validateUserJoin(const std::string user) {
 void Channel::sendMsg(const std::string &msg, int clientSocket) {
     size_t i = send(clientSocket, msg.c_str(), msg.length(), 0);
     if (i != msg.size()) {
-        std::cerr << "Error sending message to client" << std::endl;
+        std::cerr << "Error sending message to client\n";
     }
 }
 

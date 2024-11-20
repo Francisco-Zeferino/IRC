@@ -5,13 +5,13 @@
 void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName;
     iss >> channelName;
-    if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server. Can't join a channel" << std::endl;
+    if(isClientAuthenticated(it->second) == false) {
+        std::cerr << "Not authenticated to server. Can't join a channel\n";
         return ;
     }
     bool isChannel = (channelName[0] == '#');
     if (!isChannel) {
-        std::cout << channelName << " is not a valid channel name\n";
+        std::cerr << channelName << " is not a valid channel name\n";
         return;
     }
 
@@ -23,13 +23,12 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
             return;  
         }
     }
+
     if (validateChannelModes(iss, it, channel)) {
         return;
     }
 
     std::string message = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost JOIN " + channelName + "\r\n";
-    std::cout << "Client " << it->second->getSocket() << " joined channel " << channelName << "\n";
-
     if (channel->admins.empty()) {
         channel->addClient(it->second, true);
     } else {
@@ -38,7 +37,6 @@ void Server::hJoinCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     it->second->clientChannels.push_back(channel);
     sendMsgServ(message, it->first);
     channel->notifyAllInChannel(channel, message);
-    
 }
 
 bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>::iterator it, Channel* channel) {
@@ -55,7 +53,6 @@ bool Server::validateChannelModes(std::stringstream &iss, std::map<int, Client*>
     }
 
     if (channel->hasMode('k')) {
-        std::cout << "Here" << std::endl;
         std::string providedPassword;
         iss >> providedPassword;
         if (channel->password != providedPassword) {
@@ -72,11 +69,10 @@ void Server::hPassCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
     if (this->password != receivedPassword) {
         sendMsgServ(ERR_PASSWDMISMATCH(), it->first);
-        std::cout << "Incorrect password. Connection cannot be established\n";
+        std::cerr << "Incorrect password. Connection cannot be established\n";
         
     } else {
         std::cout << "Client " << it->second->getNick() << " authenticated with correct server password\n";
         it->second->passwordAuthenticated = true;
     }
-    
 }

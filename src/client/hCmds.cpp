@@ -7,7 +7,7 @@ void Server::hNickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> nickname;
 
     if(it->second->passwordAuthenticated == false){
-        std::cout << "Can't establish connection. No password was given!" << std::endl;
+        std::cerr << "Can't establish connection. No password was given!\n";
         return ;
     }
 
@@ -38,10 +38,11 @@ void Server::hUserCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> username;
 
     if(it->second->getNick().empty()){
-        std::cout << "Please provide a nickname first!" << std::endl;
+        std::cerr << "Please provide a nickname first!\n";
         return ;
     }
     it->second->setUser(username);
+
     std::string welcomeMsg = RPL_WELCOME(user_info(it->second->getNick(), it->second->getUser()), it->second->getNick());
     sendMsgServ(welcomeMsg, it->first);
     it->second->isAuthenticated = true;
@@ -68,12 +69,12 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
    std::map<Client *, bool>::iterator clientIt;
    std::vector<Bot >::iterator botIt;
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server.\n";
         return ;
     }
    Channel *channel= findChannel(channelName);
    if (!channel) {
-        std::cout << "Channel not found: " << channelName << "\n";
+        std::cerr << "Channel not found: " << channelName << "\n";
         return;
     }
     for(clientIt = channel->admins.begin(); clientIt != channel->admins.end(); clientIt++){
@@ -92,7 +93,7 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, reason;
     iss >> channelName;
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server\n.";
         return ;
     }
     Channel* channel = findChannel(channelName);
@@ -119,6 +120,9 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->notifyAllInChannel(channel, message);
 
     channel->removeClient(it->second);
+    // if (channel->admins.empty()) {
+    //     channel->hasMode("k");
+    // }
 }
 
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
@@ -126,7 +130,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
     iss >> target;
     std::getline(iss, message);
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server\n.";
         return ;
     }
     bool isChannel = (target[0] == '#'); 
@@ -134,7 +138,7 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
     if (isChannel) {
         Channel* channel = findChannel(target);
         if (!channel) {
-            std::cout << "Channel not found: " << target << "\n";
+            std::cerr << "Channel not found: " << target << "\n";
             return;
         }
         for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
@@ -142,7 +146,6 @@ void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterato
                 channel->sendMsg(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), channelMap->first->getSocket());
             }
         }
-        std::cout << "Private message from client " << it->second->getSocket() << " to " << target << ": " << message << "\n";
     } else {
         Client *targetClient = getClient(target);
         if(!targetClient)
@@ -157,13 +160,13 @@ void Server::hNoticeCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     std::getline(iss, message);
     bool isChannel = (target[0] == '#'); 
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server\n.";
         return ;
     }
     if (isChannel) {
         Channel* channel = findChannel(target);
         if (!channel) {
-            std::cout << "Channel not found: " << target << "\n";
+            std::cerr << "Channel not found: " << target << "\n";
             return;
         }
         for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
@@ -185,7 +188,7 @@ void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     std::string channelName, targetNick, reason;
     iss >> channelName >> targetNick;
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server\n.";
         return ;
     }
     Channel* channel = findChannel(channelName);
@@ -227,10 +230,10 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     std::string targetNick, targetChannel;
     iss >> targetNick >> targetChannel;
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server\n.";
         return ;
     }
-    Channel* channel = findChannel(targetChannel); //alt
+    Channel* channel = findChannel(targetChannel);
     if(!channel)
         return ;
     if (!channel->isAdmin(it->second)) {
@@ -255,8 +258,6 @@ void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator
     }
     channel->invUsers.push_back(targetNick);
 
-    std::cout << "Client " << it->second->getSocket() << " invited " << targetNick << " to channel " << targetChannel << "\n";
-
     std::string inviting = RPL_INVITING(user_info(it->second->getNick(), it->second->getUser()), targetNick, targetChannel);
     std::string inviteMsg = RPL_INVITE(user_info(it->second->getNick(), it->second->getUser()), targetNick, targetChannel);
 
@@ -268,7 +269,7 @@ void Server::hTopicCmd(std::stringstream &iss, std::map<int, Client*>::iterator 
     std::string channelName, newTopic;
     iss >> channelName;
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server\n.";
         return ;
     }
     Channel* channel = findChannel(channelName);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/19 17:19:41 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/20 17:32:28 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,12 @@ void Server::setEpoll() {
     event.events = EPOLLIN;
     event.data.fd = serverSocket;
     if(epollfd == -1){
-        std::cerr << "Error creating epoll" << std::endl;
+        std::cerr << "Error creating epoll\n";
         return ;
     }
 
     if(epoll_ctl(epollfd, EPOLL_CTL_ADD, serverSocket, &event)){
-        std::cout << "Failed to add file descriptor to epoll" << std::endl;
+        std::cout << "Failed to add file descriptor to epoll\n";
         return ;
     }
     
@@ -109,7 +109,7 @@ void Server::setEpoll() {
     while(1) {
         nfds = epoll_wait(epollfd, clientEvent, 1024, -1);
         if(nfds == -1){
-            std::cerr << "Error during epoll wait" << std::endl;
+            std::cerr << "Error during epoll wait\n";
             return;
         }
         for(int i = 0; i < nfds; i++){
@@ -137,7 +137,6 @@ Channel* Server::findChannel(const std::string& channelName) {
             return *it;
         }
     }
-    
     return NULL;
 }
 
@@ -165,10 +164,12 @@ Channel* Server::createChannel(const std::string& channelName) {
 
 void Server::removeChannel(const std::string& channelName) {
     std::vector<Channel*>::iterator it;
-    for(it = serverChannels.begin(); it != serverChannels.end(); ++it) {
-        if ((*it)->name == channelName) {
-            serverChannels.erase(it);
-            // delete *it;
+    std::vector<Channel*>::iterator nextIt;
+    Channel *del = findChannel(channelName);
+    for(it = serverChannels.begin(); it != serverChannels.end(); it++) {
+        if (*it == del) {
+            serverChannels.erase(nextIt);
+            delete del;
             std::cout << "Channel " << channelName << " removed from server.\n";
             return;
         }

@@ -7,12 +7,12 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     iss >> channelName >> mode;
 
     if(isClientAuthenticated(it->second) == false){
-        std::cout << "Not authenticated to server." << std::endl;
+        std::cerr << "Not authenticated to server." << std::endl;
         return ;
     }
-    Channel* channel = findChannel(channelName); //alt
+    Channel* channel = findChannel(channelName);
     if (!channel) {
-        std::cout << "Channel not found: " << channelName << "\n";
+        std::cerr << "Channel not found: " << channelName << "\n";
         return;
     }
 
@@ -32,6 +32,11 @@ void Server::hModeCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 void Channel::applyMode(std::stringstream &iss, const std::string mode, Client* requester) {
     if (mode.empty()) return;
     char modeSign = mode[0];
+    if (mode[0] !=  '+' && mode[0] != '-') {
+        sendMsg(ERR_UNKNOWNMODE(requester->getNick(), mode), requester->getSocket());
+        return;
+    }
+
     char modeType = mode[1];
 
     switch (modeType) {
@@ -92,10 +97,8 @@ void Channel::aOperatorMode(std::stringstream &iss, bool addOperator, Client *re
 void Channel::aInviteOnlyMode(bool enable) {
     if (enable && !hasMode('i')) {
         mode += 'i';
-        std::cout << "Invite-only mode enabled for channel " << name << "\n";
     } else if (!enable && hasMode('i')) {
         mode.erase(mode.find('i'), 1);
-        std::cout << "Invite-only mode disabled for channel " << name << "\n";
     }
     std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +i" : " -i") + "\r\n";
     notifyAllInChannel(this, modeChangeMsg);
@@ -114,7 +117,6 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *request
         this->password = newPassword;
         mode += 'k';
 
-        std::cout << "Password set for channel " << name << "\n";
         std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " +k " + newPassword + "\r\n";
         notifyAllInChannel(this, message);
     } 
@@ -122,7 +124,6 @@ void Channel::aPasswordMode(std::stringstream &iss, bool enable, Client *request
         this->password.clear();
         mode.erase(mode.find('k'), 1);
 
-        std::cout << "Password removed for channel " << name << "\n";
         std::string message = ":" + requester->getNick() + "!" + requester->getUser() + "@localhost MODE " + name + " -k\r\n";
         notifyAllInChannel(this, message);
     }
@@ -144,21 +145,21 @@ void Channel::aUserLimitMode(std::stringstream &iss, bool enable) {
             return ;
         if (isValid(newLimit)) {
             userslimit = atoi(newLimit.c_str());
+            if (userslimit < 1)
+                return;
             mode = "l";
-            std::cout << "User limit set to " << userslimit << " for channel: " << name << std::endl;
             notifyAllInChannel(this, ":localhost " + iss.str() + "\r\n");
         } else {
-            std::cout << "Invalid user limit provided.\n";
+            std::cerr << "Invalid user limit provided.\n";
             return;
         }
     } else {
         if (hasMode('l')) {
             mode.erase(mode.find('l'), 1);
             userslimit = 0;
-            std::cout << "User limit mode disabled for channel " << name << "\n";
             notifyAllInChannel(this, ":localhost MODE " + name + " -l\r\n");
         } else {
-            std::cout << "User limit mode not set, cannot disable.\n";
+            std::cerr << "User limit mode not set, cannot disable.\n";
             return;
         }
     }
@@ -168,16 +169,10 @@ void Channel::aTopicMode(bool enable) {
     if (enable) {
         if (!hasMode('t')) {
             mode += 't';
-            std::cout << "Topic protection enabled for channel " << name << "\n";
-        } else {
-            std::cout << "Topic protection is already enabled for channel " << name << "\n";
         }
     } else {
         if (hasMode('t')) {
             mode.erase(mode.find('t'), 1);
-            std::cout << "Topic protection disabled for channel " << name << "\n";
-        } else {
-            std::cout << "Topic protection is already disabled for channel " << name << "\n";
         }
     }
     std::string modeChangeMsg = ":localhost MODE " + name + (enable ? " +t" : " -t") + "\r\n";

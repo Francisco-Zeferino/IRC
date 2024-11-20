@@ -4,7 +4,7 @@
 
 bool Channel::startHangman(const std::string& word) {
     if (hangmanActive) {
-        std::cerr << "A Hangman game is already active in this channel.\n";
+        std::cout << "A Hangman game is already active in this channel.\n";
         return false;
     }
 
@@ -115,40 +115,40 @@ void Server::aBotHangman(std::map<int, Client*>::iterator it, const std::string 
 
     if (action == "start") {
         if (wordOrLetter.empty()) {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Usage: /BOT hangman #chanel start <word>"), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Usage: /BOT hangman #chanel start <word>"), it->first);
             return;
         }
 
         if (ch->startHangman(wordOrLetter)) {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Hangman game started! Guess the word!"), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Hangman game started! Guess the word!"), it->first);
         } else {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "A game is already active in this channel."), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "A game is already active in this channel."), it->first);
         }
     } else if (action == "guess") {
         if (wordOrLetter.size() != 1 || !std::isalpha(wordOrLetter[0])) {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Invalid guess. Please guess a single letter."), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Invalid guess. Please guess a single letter."), it->first);
             return;
         }
 
         std::string resultMsg;
         if (ch->guessLetter(wordOrLetter[0], resultMsg)) {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, resultMsg), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, resultMsg), it->first);
         } else {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, resultMsg), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, resultMsg), it->first);
         }
     } else if (action == "solve") {
         if (wordOrLetter.empty()) {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Usage: /BOT hangman #chanel solve <word>"), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Usage: /BOT hangman #chanel solve <word>"), it->first);
             return;
         }
 
-        std::string resultMsg;
+        std::string resultMsg = "youWIN";
         if (ch->solveWord(wordOrLetter, resultMsg)) {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Game result: " + resultMsg), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Game result: " + resultMsg), it->first);
         } else {
-            sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Game result: " + resultMsg), it->first);
+            sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Game result: " + resultMsg), it->first);
         }
     } else {
-        sendMsgServ(RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, "Unknown Hangman command. Use: start, guess, or solve"), it->first);
+        sendMsgServ(RPL_PRIVMSGB(user_info("BoTony", "BotUser"), channelName, "Unknown Hangman command. Use: start, guess, or solve"), it->first);
     }
 }

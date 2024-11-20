@@ -28,7 +28,7 @@ int Server::setBot() {
     fcntl(botSocket, F_SETFL, O_NONBLOCK);
     if (botSocket < 0) {
         std::cerr << "Error creating bot socket\n";
-        throw std::runtime_error("Error creating bot socket");
+        throw std::runtime_error("Error creating bot socket\n");
     }
     struct epoll_event botEvent;
     botEvent.events = EPOLLIN;
@@ -36,7 +36,7 @@ int Server::setBot() {
     int await = epoll_ctl(epollfd, EPOLL_CTL_ADD, botSocket, &botEvent);
     if(await < 0){
         std::cerr << "Error adding bot socket to epoll\n";
-        throw std::runtime_error("Error adding bot socket to epoll");
+        throw std::runtime_error("Error adding bot socket to epoll\n");
     }
     return botSocket;
 }
@@ -49,10 +49,9 @@ Bot Server::createBot() {
 void Server::hBotCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string command, channelName;
     iss >> command >> channelName;
-    std::cout << " STRING: "<< command << " " << channelName << " " << "\n";
     if (command == "hangman") {
         if (channelName.empty()) {
-            sendMsgServ("Usage: /BOT hangman <start|guess|solve> <channel> [word|letter]\n", it->first);
+            sendMsgServ("Usage: /BOT hangman <channel> <start|guess|solve> [word|letter]\n", it->first);
             return;
         }
         aBotHangman(it, channelName, iss);
@@ -109,7 +108,7 @@ void Server::aBotHelp(std::map<int, Client*>::iterator it, const std::string &ch
         return;
     }
 
-    std::string message = "Commands available: join, ola, time, leave, gg.\r\n";
+    std::string message = "Commands available: join, ola, time, leave, hangman, help.\r\n";
     ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, message));
 }
 
@@ -127,7 +126,6 @@ void Server::aBotLeave(std::map<int, Client*>::iterator it, const std::string &c
         break;
     }
 }
-
 
 void Server::aBotTime(std::map<int, Client*>::iterator it, const std::string &channelName) {
     Channel* ch = findChannel(channelName);

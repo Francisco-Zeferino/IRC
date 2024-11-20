@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffilipe- <ffilipe-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 10:07:21 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/19 17:37:39 by ffilipe-         ###   ########.fr       */
+/*   Updated: 2024/11/20 14:49:21 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,10 @@
 #include <vector>
 #include <sys/epoll.h>
 #include <errno.h>
-
-
-#include "numeric_responses.hpp"
-
 #include <ctime>
 #include <iomanip>
+
+#include "numeric_responses.hpp"
 
 class Client;
 class Channel;
