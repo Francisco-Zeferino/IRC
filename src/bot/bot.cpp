@@ -108,7 +108,7 @@ void Server::aBotHelp(std::map<int, Client*>::iterator it, const std::string &ch
         return;
     }
 
-    std::string message = "Commands available: join, ola, time, leave, hangman, help.\r\n";
+    std::string message = " Commands available: join, ola, time, leave, hangman, help.\r\n";
     ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, message));
 }
 
@@ -143,7 +143,7 @@ void Server::aBotTime(std::map<int, Client*>::iterator it, const std::string &ch
     std::string timeStr = std::ctime(&currentTime);
     timeStr.erase(timeStr.find_last_not_of(" \n\r\t") + 1);
 
-    std::string timeResponse = "Current time is: " + timeStr + " ";
+    std::string timeResponse = " Current time is: " + timeStr + " ";
     ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, timeResponse));
 }
 
@@ -160,7 +160,7 @@ void Server::aBotHello(std::map<int, Client*>::iterator it, const std::string &c
         return;
     }
 
-    std::string helloResponse = "YOOOOOOOOOOOOO, tudo fixe " + it->second->getNick() + "?";
+    std::string helloResponse = " YOOOOOOOOOOOOO, tudo fixe " + it->second->getNick() + "?";
     ch->notifyAllInChannel(ch, RPL_PRIVMSG(user_info("BoTony", "BotUser"), channelName, helloResponse));
 }
 

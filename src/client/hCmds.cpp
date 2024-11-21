@@ -120,9 +120,7 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->notifyAllInChannel(channel, message);
 
     channel->removeClient(it->second);
-    // if (channel->admins.empty()) {
-    //     channel->hasMode("k");
-    // }
+    removeChannelModes(channelName);
 }
 
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
