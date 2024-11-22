@@ -6,7 +6,7 @@
 /*   By: mbaptist <mbaptist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 15:53:28 by ffilipe-          #+#    #+#             */
-/*   Updated: 2024/11/20 17:32:28 by mbaptist         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:11:56 by mbaptist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,6 +164,10 @@ Channel* Server::createChannel(const std::string& channelName) {
 
 void Server::removeChannelModes(const std::string& channelName) {
     Channel *channel = findChannel(channelName);
+    // std::vector<Channel* > ::iterator it;
+    // it = std::find(serverChannels.begin(), serverChannels.end(), channel);
+    // serverChannels.erase(it);
+    // delete(channel);
     if(channel == NULL) {
         std::cerr << "Channel not found\n";
         return;

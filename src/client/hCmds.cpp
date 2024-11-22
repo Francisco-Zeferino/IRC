@@ -92,7 +92,7 @@ void Server::hWhoCmd(std::stringstream &iss, std::map<int, Client*>::iterator it
 void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string channelName, reason;
     iss >> channelName;
-    if(isClientAuthenticated(it->second) == false){
+    if(isClientAuthenticated(it->second) == false) {
         std::cerr << "Not authenticated to server\n.";
         return ;
     }
@@ -120,34 +120,62 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
     channel->notifyAllInChannel(channel, message);
 
     channel->removeClient(it->second);
-    removeChannelModes(channelName);
+
+    if (channel->admins.empty()) {
+        std::cout << "Channel " << channelName << " is empty. Clearing modes and marking for cleanup.\n";
+
+        channel->mode.clear();
+
+        std::string removalMessage = ":localhost NOTICE " + channelName + " :The channel is now empty and will be reset.\r\n";
+        channel->notifyAllInChannel(channel, removalMessage);
+
+        removeChannelModes(channelName);
+    }
 }
+
 
 void Server::hPrivMsgCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
     std::string target, message;
     iss >> target;
     std::getline(iss, message);
-    if(isClientAuthenticated(it->second) == false){
-        std::cerr << "Not authenticated to server\n.";
-        return ;
+
+    if (isClientAuthenticated(it->second) == false) {
+        std::cerr << "Not authenticated to server.\n";
+        return;
     }
+
     bool isChannel = (target[0] == '#'); 
-    
+
     if (isChannel) {
         Channel* channel = findChannel(target);
         if (!channel) {
             std::cerr << "Channel not found: " << target << "\n";
             return;
         }
-        for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); channelMap++) {
+
+        bool isMember = false;
+        for (std::map<Client*, bool>::iterator clientIt = channel->admins.begin(); clientIt != channel->admins.end(); ++clientIt) {
+            if (clientIt->first == it->second) {
+                isMember = true;
+                break;
+            }
+        }
+        if (!isMember) {
+            std::cerr << "User is not a member of the channel: " << target << "\n";
+            sendMsgServ("Error: You are not a member of the channel " + target + ".\n", it->first);
+            return;
+        }
+        for (std::map<Client*, bool>::iterator channelMap = channel->admins.begin(); channelMap != channel->admins.end(); ++channelMap) {
             if (it->second != channelMap->first) {
                 channel->sendMsg(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), channelMap->first->getSocket());
             }
         }
     } else {
-        Client *targetClient = getClient(target);
-        if(!targetClient)
-            return ;
+        Client* targetClient = getClient(target);
+        if (!targetClient) {
+            std::cerr << "Target client not found: " << target << "\n";
+            return;
+        }
         sendMsgServ(RPL_PRIVMSG(user_info(it->second->getNick(), it->second->getUser()), target, message), targetClient->getSocket());
     }
 }
@@ -221,7 +249,19 @@ void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
     std::string kickMessage = ":" + it->second->getNick() + "!" + it->second->getUser() + "@localhost KICK " + channelName + " " + targetNick + " :" + reason + "\r\n";
     channel->notifyAllInChannel(channel, kickMessage);
+
     channel->removeClient(targetClient);
+
+    if (channel->admins.empty()) {
+        std::cout << "Channel " << channelName << " is empty. Clearing modes and marking for cleanup.\n";
+
+        channel->mode.clear();
+
+        std::string removalMessage = ":localhost NOTICE " + channelName + " :The channel is now empty and will be reset.\r\n";
+        channel->notifyAllInChannel(channel, removalMessage);
+
+        removeChannelModes(channelName);
+    }
 }
 
 void Server::hInviteCmd(std::stringstream &iss, std::map<int, Client*>::iterator it) {
