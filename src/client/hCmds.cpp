@@ -254,12 +254,7 @@ void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
 
     if (channel->admins.empty()) {
         std::cout << "Channel " << channelName << " is empty. Clearing modes and marking for cleanup.\n";
-
         channel->mode.clear();
-
-        std::string removalMessage = ":localhost NOTICE " + channelName + " :The channel is now empty and will be reset.\r\n";
-        channel->notifyAllInChannel(channel, removalMessage);
-
         removeChannel(channelName);
     }
 }
