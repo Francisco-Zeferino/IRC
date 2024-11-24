@@ -162,20 +162,20 @@ Channel* Server::createChannel(const std::string& channelName) {
     return newChannel;
 }
 
-void Server::removeChannelModes(const std::string& channelName) {
+void Server::removeChannel(const std::string& channelName) {
     Channel *channel = findChannel(channelName);
-    // std::vector<Channel* > ::iterator it;
-    // it = std::find(serverChannels.begin(), serverChannels.end(), channel);
-    // serverChannels.erase(it);
-    // delete(channel);
-    if(channel == NULL) {
+    if (channel == NULL) {
         std::cerr << "Channel not found\n";
         return;
     }
-    channel->setMode("-t");    
-    channel->setMode("-i");
-    channel->setMode("-k");
-    channel->setMode("-l");
+    std::vector<Channel*>::iterator it = serverChannels.begin();
+    for(; it != serverChannels.end(); ++it) {
+        if ((*it)->name == channelName) {
+            serverChannels.erase(it);
+            delete channel;
+            break;
+        }
+    }
 }
 
 void Server::setConnection(int epollfd){

@@ -129,7 +129,7 @@ void Server::hPartCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         std::string removalMessage = ":localhost NOTICE " + channelName + " :The channel is now empty and will be reset.\r\n";
         channel->notifyAllInChannel(channel, removalMessage);
 
-        removeChannelModes(channelName);
+        removeChannel(channelName);
     }
 }
 
@@ -260,7 +260,7 @@ void Server::hKickCmd(std::stringstream &iss, std::map<int, Client*>::iterator i
         std::string removalMessage = ":localhost NOTICE " + channelName + " :The channel is now empty and will be reset.\r\n";
         channel->notifyAllInChannel(channel, removalMessage);
 
-        removeChannelModes(channelName);
+        removeChannel(channelName);
     }
 }
 

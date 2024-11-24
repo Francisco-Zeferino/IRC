@@ -116,7 +116,7 @@ class Server
         
         Channel* findChannel(const std::string& channelName);
         Channel* createChannel(const std::string& channelName);
-        void removeChannelModes(const std::string& channelName);
+        void removeChannel(const std::string& channelName);
 
 };  
 
