@@ -26,10 +26,4 @@ fclean : clean
 
 re : fclean all
 
-run:
-	make re && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes \
-	./ircserv 8080 123 
-# Apagar aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-	
-
 .PHONY: all clean fclean re
